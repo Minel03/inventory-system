@@ -13,11 +13,17 @@ return new class extends Migration
     {
         Schema::create('stock_movements', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('product_id')->constrained()->onDelete('cascade'); //Product
-            $table->foreignId('warehouse_id')->constrained()->onDelete('set null'); //Warehouse / Branch / Location
+            $table->unsignedBigInteger('product_id');
+            $table->index('product_id');
+            $table->foreign('product_id')->references('id')->on('products')->onDelete('cascade'); //Product
+            $table->unsignedBigInteger('warehouse_id')->nullable();
+            $table->index('warehouse_id');
+            $table->foreign('warehouse_id')->references('id')->on('warehouses')->onDelete('set null'); //Warehouse / Branch / Location
             $table->string('type'); //For 'In', 'Out', 'Adjustment'
             $table->string('reference_no'); //Reference No. (DR, PO, Invoice)
-            $table->foreignId('supplier_id')->nullable()->constrained()->onDelete('set null'); //Stock In / Receiving
+            $table->unsignedBigInteger('supplier_id')->nullable();
+            $table->index('supplier_id');
+            $table->foreign('supplier_id')->references('id')->on('suppliers')->onDelete('set null'); //Stock In / Receiving
             $table->date('date'); //Date Received
             $table->integer('quantity'); //Quantity
             $table->decimal('unit_cost', 8, 2)->nullable(); //Unit Cost
@@ -34,6 +40,15 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('stock_movements');
+        if (Schema::hasTable('stock_movements')) {
+            Schema::table('stock_movements', function (Blueprint $table) {
+                $table->dropForeign(['product_id']);
+                $table->dropForeign(['warehouse_id']);
+                $table->dropForeign(['supplier_id']);
+                $table->dropColumn(['product_id']);
+                $table->dropColumn(['warehouse_id']);
+                $table->dropColumn(['supplier_id']);
+            });
+        }
     }
 };
