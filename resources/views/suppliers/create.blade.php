@@ -21,8 +21,9 @@
 
                         <div>
                             <label for="code" class="block text-sm font-medium text-gray-700">Supplier Code *</label>
-                            <input type="text" name="code" id="code" value="{{ old('code') }}" required
-                                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 @error('code') @enderror">
+                            <input type="text" name="code" id="code" value="{{ $code }}" required
+                                readonly
+                                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-gray-100 cursor-not-allowed @error('code') @enderror">
                             @error('code')
                                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                             @enderror

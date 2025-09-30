@@ -227,6 +227,31 @@
                     @enderror
                 </div>
 
+                <!-- Barcode Preview -->
+                <div>
+                    <h3 class="text-lg font-medium text-gray-900 mb-4">Barcode Preview</h3>
+                    <div class="bg-white border-2 border-gray-200 rounded-lg p-6 text-center">
+                        <div class="inline-block p-4 bg-white border-2 border-gray-200 rounded-lg">
+                            <svg id="sku-barcode"></svg>
+                        </div>
+                        <p class="mt-2 text-sm text-gray-500">SKU: {{ $sku }}</p>
+                    </div>
+                </div>
+
+                <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js"></script>
+                <script>
+                    document.addEventListener('DOMContentLoaded', function() {
+                        const sku = "{{ $sku }}";
+                        if (sku) {
+                            JsBarcode("#sku-barcode", sku, {
+                                format: "CODE128",
+                                displayValue: true,
+                                height: 40
+                            });
+                        }
+                    });
+                </script>
+
                 <div class="flex justify-end space-x-3">
                     <a href="{{ route('products.index') }}"
                         class="bg-gray-300 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-400 transition-colors">

@@ -61,7 +61,50 @@ class StockMovementController extends Controller
         $count = StockMovement::where('reference_no', 'like', "$prefix%")->count() + 1;
         $reference_no = sprintf('%s-%03d', $prefix, $count);
 
-        return view('stock-movements.create', compact('products', 'suppliers', 'warehouses', 'reference_no'));
+        // Get default values based on product and type
+        $default_warehouse_id = null;
+        $default_supplier_id = null;
+        $default_unit_cost = null;
+        $default_expiry_date = null;
+
+        if ($request->query('product_id')) {
+            $product = Product::find($request->query('product_id'));
+            if ($product) {
+                // Auto-select supplier for stock out
+                if ($type === 'Out' && $product->supplier_id) {
+                    $default_supplier_id = $product->supplier_id;
+                }
+
+                // Auto-select warehouse if product has current stock
+                if ($product->current_stock > 0) {
+                    // Get the most recent warehouse where this product has stock
+                    $recentWarehouse = StockMovement::where('product_id', $product->id)
+                        ->where('warehouse_id', '!=', null)
+                        ->where('type', 'In')
+                        ->orderBy('date', 'desc')
+                        ->first();
+
+                    if ($recentWarehouse) {
+                        $default_warehouse_id = $recentWarehouse->warehouse_id;
+                    }
+                }
+
+                // Set default unit cost and expiry date
+                $default_unit_cost = $product->cost_price;
+                $default_expiry_date = $product->expiry_date ? \Carbon\Carbon::parse($product->expiry_date)->format('Y-m-d') : null;
+            }
+        }
+
+        return view('stock-movements.create', compact(
+            'products',
+            'suppliers',
+            'warehouses',
+            'reference_no',
+            'default_warehouse_id',
+            'default_supplier_id',
+            'default_unit_cost',
+            'default_expiry_date'
+        ));
     }
 
     public function store(Request $request)
@@ -80,6 +123,21 @@ class StockMovementController extends Controller
             'reason' => 'nullable|string|max:255',
             'adjustment_diff' => 'required_if:type,Adjustment|integer|nullable',
         ]);
+
+        // Add custom validation for stock out
+        if ($request->type === 'Out' && $request->product_id) {
+            $product = Product::find($request->product_id);
+            if ($product) {
+                $currentStock = $product->current_stock;
+                $requestedQuantity = (int) $request->quantity;
+
+                if ($currentStock < $requestedQuantity) {
+                    $validator->after(function ($validator) use ($currentStock, $requestedQuantity) {
+                        $validator->errors()->add('quantity', "Insufficient stock. Current stock: {$currentStock}, Requested: {$requestedQuantity}");
+                    });
+                }
+            }
+        }
 
         if ($validator->fails()) {
             return redirect()->back()->withErrors($validator)->withInput();

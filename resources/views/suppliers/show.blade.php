@@ -85,6 +85,19 @@
 
             <!-- Sidebar -->
             <div class="space-y-6">
+                <!-- Barcode -->
+                @if ($supplier->barcode)
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-4">Barcode</h3>
+                        <div class="text-center">
+                            <div class="inline-block p-4 bg-white border-2 border-gray-200 rounded-lg">
+                                {!! $supplier->barcode !!}
+                            </div>
+                            <p class="mt-2 text-sm text-gray-500">Code: {{ $supplier->code }}</p>
+                        </div>
+                    </div>
+                @endif
+
                 <!-- Statistics -->
                 <div class="bg-white rounded-lg shadow p-6">
                     <h3 class="text-lg font-semibold text-gray-900 mb-4">Statistics</h3>

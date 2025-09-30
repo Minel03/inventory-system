@@ -38,7 +38,18 @@ class SupplierController extends Controller
      */
     public function create()
     {
-        return view('suppliers.create');
+        // Generate unique supplier code
+        $year = now()->format('Y');
+        $count = Supplier::where('code', 'like', "SUP-$year%")->count() + 1;
+        $code = sprintf('SUP-%s-%03d', $year, $count);
+
+        // Ensure code is unique
+        while (Supplier::where('code', $code)->exists()) {
+            $count++;
+            $code = sprintf('SUP-%s-%03d', $year, $count);
+        }
+
+        return view('suppliers.create', compact('code'));
     }
 
     /**

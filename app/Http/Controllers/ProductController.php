@@ -80,6 +80,10 @@ class ProductController extends Controller
         $data['tags'] = $data['tags'] ?? [];
         $data['tags'] = json_encode($data['tags']);
 
+        // Generate barcode
+        $barcode = new \Milon\Barcode\DNS1D();
+        $data['barcode'] = $barcode->getBarcodeSVG($data['sku'], 'C128');
+
         Product::create($data);
 
         return redirect()->route('products.index')->with('success', 'Product created successfully.');
