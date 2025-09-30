@@ -123,7 +123,7 @@ class PurchaseRequisitionController extends Controller
 
     protected function createPurchaseOrder(PurchaseRequisition $pr)
     {
-        $items = json_decode($pr->items, true);
+        $items = $pr->items;
         $supplierId = null;
         foreach ($items as $item) {
             $product = Product::find($item['product_id']);
