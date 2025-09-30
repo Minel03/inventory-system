@@ -51,6 +51,11 @@ class Product extends Model
         return '₱' . number_format($this->sell_price, 2);
     }
 
+    public function getFormattedCostAttribute()
+    {
+        return '₱' . number_format($this->cost_price, 2);
+    }
+
     public function getCurrentStockAttribute()
     {
         $inStock = $this->stockMovements()->where('type', 'In')->sum('quantity');
