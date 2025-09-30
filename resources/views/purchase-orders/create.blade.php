@@ -31,16 +31,20 @@
 
                         <div>
                             <label for="supplier_id" class="block text-sm font-medium text-gray-700">Supplier *</label>
-                            <select name="supplier_id" id="supplier_id" required
-                                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 @error('supplier_id') @enderror">
+                            <select name="supplier_id" id="supplier_id"
+                                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md"
+                                @if (!empty($supplierId)) disabled @endif required>
                                 <option value="">Select Supplier</option>
-                                @foreach ($suppliers as $supplier)
-                                    <option value="{{ $supplier->id }}"
-                                        {{ old('supplier_id') == $supplier->id ? 'selected' : '' }}>
-                                        {{ $supplier->company_name }}
+                                @foreach ($suppliers as $s)
+                                    <option value="{{ $s->id }}"
+                                        {{ old('supplier_id', $supplierId ?? null) == $s->id ? 'selected' : '' }}>
+                                        {{ $s->company_name }}
                                     </option>
                                 @endforeach
                             </select>
+                            @if (!empty($supplierId))
+                                <input type="hidden" name="supplier_id" value="{{ $supplierId }}">
+                            @endif
                             @error('supplier_id')
                                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                             @enderror
@@ -82,15 +86,35 @@
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700">Product *</label>
-                                        <select name="items[0][product_id]" required
-                                            class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                                        <select name="items[0][product_id]" class="product-select ... " required>
                                             <option value="">Select Product</option>
-                                            @foreach ($products as $product)
-                                                <option value="{{ $product->id }}">{{ $product->name }}
-                                                    ({{ $product->sku }})
-                                                </option>
+                                            @foreach ($products as $p)
+                                                <option value="{{ $p->id }}" data-supplier="{{ $p->supplier_id }}">
+                                                    {{ $p->name }} ({{ $p->sku }})</option>
                                             @endforeach
                                         </select>
+
+                                        <script>
+                                            function filterProducts(container) {
+                                                const supplierId = document.getElementById('supplier_id').value || '';
+                                                container.querySelectorAll('.product-select').forEach(sel => {
+                                                    sel.querySelectorAll('option[value]').forEach(opt => {
+                                                        opt.hidden = supplierId && opt.dataset.supplier !== supplierId;
+                                                    });
+                                                    if (supplierId && sel.selectedOptions[0] && sel.selectedOptions[0].hidden) sel.value = '';
+                                                });
+                                            }
+
+                                            document.getElementById('supplier_id').addEventListener('change', () => filterProducts(document));
+                                            filterProducts(document); // initial (preselected supplier)
+
+                                            // when adding new item rows:
+                                            document.getElementById('add-item').addEventListener('click', () => {
+                                                // after appending the new row as you already do:
+                                                const lastRow = document.querySelector('#items-container .item-row:last-child');
+                                                filterProducts(lastRow);
+                                            });
+                                        </script>
                                     </div>
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700">Quantity *</label>
@@ -113,8 +137,14 @@
                         class="bg-gray-300 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-400 transition-colors">
                         Cancel
                     </a>
+                    @if (!empty($noProducts) && $noProducts)
+                        <div class="bg-red-50 text-red-700 p-3 rounded">
+                            Cannot create Purchase Order: selected supplier has no products.
+                        </div>
+                    @endif
                     <button type="submit"
-                        class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors">
+                        class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors"
+                        @if (!empty($noProducts) && $noProducts) disabled class="bg-gray-400 cursor-not-allowed px-4 py-2 rounded-md" @endif>
                         Create Purchase Order
                     </button>
                 </div>

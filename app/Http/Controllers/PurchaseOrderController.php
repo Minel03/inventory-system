@@ -50,11 +50,14 @@ class PurchaseOrderController extends Controller
     /**
      * Show the form for creating a new resource.
      */
-    public function create()
+    public function create(Request $request)
     {
-        $suppliers = Supplier::all();
-        $products = Product::all();
-        return view('purchase-orders.create', compact('suppliers', 'products'));
+        $supplierId = (int) $request->query('supplier_id');
+        $suppliers  = Supplier::all();
+        $products   = Product::when($supplierId, fn($q) => $q->where('supplier_id', $supplierId))->get();
+
+        $noProducts = $supplierId && $products->isEmpty();
+        return view('purchase-orders.create', compact('suppliers', 'products', 'supplierId', 'noProducts'));
     }
 
     /**

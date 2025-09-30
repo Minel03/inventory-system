@@ -125,10 +125,16 @@
                             class="block w-full text-center bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors">
                             Add Product
                         </a>
-                        <a href="{{ route('purchase-orders.create', ['supplier_id' => $supplier->id]) }}"
-                            class="block w-full text-center bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition-colors">
+                        @if (!empty($noProducts) && $noProducts)
+                            <div class="bg-red-50 text-red-700 p-3 rounded">
+                                Cannot create Purchase Order: selected supplier has no products.
+                            </div>
+                        @endif
+                        <button type="submit"
+                            class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors"
+                            @if (!empty($noProducts) && $noProducts) disabled class="bg-gray-400 cursor-not-allowed px-4 py-2 rounded-md" @endif>
                             Create Purchase Order
-                        </a>
+                        </button>
                     </div>
                 </div>
             </div>
