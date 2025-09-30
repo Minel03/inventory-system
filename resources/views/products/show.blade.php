@@ -154,11 +154,11 @@
                                     <p class="mt-1 text-sm text-gray-900">{{ $product->batch_number }}</p>
                                 </div>
                             @endif
-                            @php
-                                $daysUntilExpiry = now()->diffInDays($product->expiry_date, false);
-                            @endphp
                             <div>
                                 <label class="block text-sm font-medium text-gray-500">Days Until Expiry</label>
+                                @php
+                                    $daysUntilExpiry = (int) now()->diffInDays($product->expiry_date, false);
+                                @endphp
                                 <p
                                     class="mt-1 text-sm font-semibold {{ $daysUntilExpiry < 30 ? 'text-red-600' : ($daysUntilExpiry < 90 ? 'text-yellow-600' : 'text-green-600') }}">
                                     {{ $daysUntilExpiry > 0 ? $daysUntilExpiry . ' days' : 'Expired' }}

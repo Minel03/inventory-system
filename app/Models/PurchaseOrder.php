@@ -39,8 +39,26 @@ class PurchaseOrder extends Model
 
     public function getTotalAmountAttribute()
     {
+        $items = $this->items;
+
+        // Ensure $items is an array
+        if (is_string($items)) {
+            try {
+                $items = json_decode($items, true);
+                if (json_last_error() !== JSON_ERROR_NONE) {
+                    return 0; // Return 0 or handle as needed
+                }
+            } catch (\Exception $e) {
+                return 0;
+            }
+        }
+
+        if (!is_array($items)) {
+            return 0; // Return 0 or handle as needed
+        }
+
         $total = 0;
-        foreach ($this->items as $item) {
+        foreach ($items as $item) {
             $product = Product::find($item['product_id']);
             if ($product) {
                 $total += $product->cost_price * $item['quantity'];

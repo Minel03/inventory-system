@@ -2,6 +2,17 @@
 
 @section('content')
     <div class="space-y-6">
+        @if ($errors->any())
+            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+                <strong class="font-bold">Error!</strong>
+                <ul>
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+
         <div class="flex justify-between items-center">
             <h1 class="text-3xl font-bold text-gray-900">Purchase Order Details</h1>
             <div class="flex space-x-3">
@@ -36,11 +47,11 @@
                             <p class="mt-1">
                                 <span
                                     class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
-                                {{ $purchaseOrder->status === 'Pending'
-                                    ? 'bg-yellow-100 text-yellow-800'
-                                    : ($purchaseOrder->status === 'Approved'
-                                        ? 'bg-blue-100 text-blue-800'
-                                        : 'bg-green-100 text-green-800') }}">
+                                    {{ $purchaseOrder->status === 'Pending'
+                                        ? 'bg-yellow-100 text-yellow-800'
+                                        : ($purchaseOrder->status === 'Approved'
+                                            ? 'bg-blue-100 text-blue-800'
+                                            : 'bg-green-100 text-green-800') }}">
                                     {{ $purchaseOrder->status }}
                                 </span>
                             </p>
@@ -106,9 +117,30 @@
                             </thead>
                             <tbody class="bg-white divide-y divide-gray-200">
                                 @php
-                                    $items = json_decode($purchaseOrder->items, true);
-                                    if (!is_array($items)) {
+                                    $items = $purchaseOrder->items;
+                                    if (is_string($items)) {
+                                        try {
+                                            $items = json_decode($items, true);
+                                            if (!is_array($items)) {
+                                                $items = [];
+                                                \Log::error(
+                                                    'Invalid JSON in items for PurchaseOrder ID: ' . $purchaseOrder->id,
+                                                );
+                                            }
+                                        } catch (\Exception $e) {
+                                            $items = [];
+                                            \Log::error(
+                                                'Error decoding items for PurchaseOrder ID: ' .
+                                                    $purchaseOrder->id .
+                                                    ' - ' .
+                                                    $e->getMessage(),
+                                            );
+                                        }
+                                    } elseif (!is_array($items)) {
                                         $items = [];
+                                        \Log::error(
+                                            'Items is not an array for PurchaseOrder ID: ' . $purchaseOrder->id,
+                                        );
                                     }
                                     $totalAmount = 0;
                                 @endphp
@@ -137,6 +169,13 @@
                                         </td>
                                     </tr>
                                 @endforeach
+                                @if (empty($items))
+                                    <tr>
+                                        <td colspan="5" class="px-6 py-4 text-center text-sm text-gray-500">
+                                            No items found.
+                                        </td>
+                                    </tr>
+                                @endif
                             </tbody>
                             <tfoot class="bg-gray-50">
                                 <tr>
@@ -149,56 +188,57 @@
                         </table>
                     </div>
                 </div>
-            </div>
 
-            <!-- Sidebar -->
-            <div class="space-y-6">
-                <!-- Quick Actions -->
-                <div class="bg-white rounded-lg shadow p-6">
-                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
-                    <div class="space-y-2">
-                        <a href="{{ route('suppliers.show', $purchaseOrder->supplier) }}"
-                            class="block w-full text-center bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors">
-                            View Supplier
-                        </a>
-                        @if ($purchaseOrder->status !== 'Received')
-                            <form action="{{ route('purchase-orders.update', $purchaseOrder) }}" method="POST"
-                                class="inline w-full">
-                                @csrf
-                                @method('PUT')
-                                <input type="hidden" name="po_number" value="{{ $purchaseOrder->po_number }}">
-                                <input type="hidden" name="supplier_id" value="{{ $purchaseOrder->supplier_id }}">
-                                <input type="hidden" name="date" value="{{ $purchaseOrder->date->format('Y-m-d') }}">
-                                <input type="hidden" name="items" value="{{ $purchaseOrder->items }}">
-                                <input type="hidden" name="status" value="Received">
-                                <button type="submit"
-                                    class="w-full bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition-colors">
-                                    Mark as Received
-                                </button>
-                            </form>
-                        @endif
+                <!-- Sidebar -->
+                <div class="space-y-6">
+                    <!-- Quick Actions -->
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
+                        <div class="space-y-2">
+                            <a href="{{ route('suppliers.show', $purchaseOrder->supplier) }}"
+                                class="block w-full text-center bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors">
+                                View Supplier
+                            </a>
+                            @if ($purchaseOrder->status !== 'Received')
+                                <form action="{{ route('purchase-orders.update', $purchaseOrder) }}" method="POST"
+                                    class="inline w-full">
+                                    @csrf
+                                    @method('PUT')
+                                    <input type="hidden" name="po_number" value="{{ $purchaseOrder->po_number }}">
+                                    <input type="hidden" name="supplier_id" value="{{ $purchaseOrder->supplier_id }}">
+                                    <input type="hidden" name="date"
+                                        value="{{ $purchaseOrder->date->format('Y-m-d') }}">
+                                    <input type="hidden" name="items" value="{{ json_encode($purchaseOrder->items) }}">
+                                    <input type="hidden" name="status" value="Received">
+                                    <button type="submit"
+                                        class="w-full bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition-colors">
+                                        Mark as Received
+                                    </button>
+                                </form>
+                            @endif
+                        </div>
                     </div>
-                </div>
 
-                <!-- Order Summary -->
-                <div class="bg-white rounded-lg shadow p-6">
-                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Order Summary</h3>
-                    <div class="space-y-2">
-                        <div class="flex justify-between">
-                            <span class="text-sm text-gray-500">Items:</span>
-                            <span class="text-sm text-gray-900">{{ count($items) }}</span>
-                        </div>
-                        <div class="flex justify-between">
-                            <span class="text-sm text-gray-500">Total Quantity:</span>
-                            <span class="text-sm text-gray-900">{{ array_sum(array_column($items, 'quantity')) }}</span>
-                        </div>
-                        <div class="flex justify-between font-medium">
-                            <span class="text-sm text-gray-900">Total Amount:</span>
-                            <span class="text-sm text-gray-900">₱{{ number_format($totalAmount, 2) }}</span>
+                    <!-- Order Summary -->
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-4">Order Summary</h3>
+                        <div class="space-y-2">
+                            <div class="flex justify-between">
+                                <span class="text-sm text-gray-500">Items:</span>
+                                <span class="text-sm text-gray-900">{{ count($items) }}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-sm text-gray-500">Total Quantity:</span>
+                                <span
+                                    class="text-sm text-gray-900">{{ array_sum(array_column($items, 'quantity')) }}</span>
+                            </div>
+                            <div class="flex justify-between font-medium">
+                                <span class="text-sm text-gray-900">Total Amount:</span>
+                                <span class="text-sm text-gray-900">₱{{ number_format($totalAmount, 2) }}</span>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
-@endsection
+    @endsection

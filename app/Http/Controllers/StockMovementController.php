@@ -70,7 +70,7 @@ class StockMovementController extends Controller
         $validator = Validator::make($request->all(), [
             'product_id' => 'required|exists:products,id',
             'warehouse_id' => 'nullable|exists:warehouses,id',
-            'type' => 'required|in:in,out,adjustment',
+            'type' => 'required|in:In,Out,Adjustment',
             'reference_no' => 'required|string|max:100',
             'supplier_id' => 'nullable|exists:suppliers,id',
             'date' => 'required|date',

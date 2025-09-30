@@ -2,6 +2,17 @@
 
 @section('content')
     <div class="space-y-6">
+        @if ($errors->any())
+            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+                <strong class="font-bold">Error!</strong>
+                <ul>
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+
         <div class="flex justify-between items-center">
             <h1 class="text-3xl font-bold text-gray-900">Edit Purchase Order</h1>
             <a href="{{ route('purchase-orders.show', $purchaseOrder) }}"
@@ -52,7 +63,7 @@
                             <label for="date" class="block text-sm font-medium text-gray-700">Date *</label>
                             <input type="date" name="date" id="date"
                                 value="{{ old('date', $purchaseOrder->date->format('Y-m-d')) }}" required
-                                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 @error('date') @enderror">
+                                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 @error('date')  @enderror">
                             @error('date')
                                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                             @enderror
@@ -85,44 +96,74 @@
 
                         <div id="items-container">
                             @php
-                                $items = json_decode($purchaseOrder->items, true);
-                                if (!is_array($items)) {
+                                $items = $purchaseOrder->items;
+                                if (is_string($items)) {
+                                    try {
+                                        $items = json_decode($items, true);
+                                        if (!is_array($items)) {
+                                            $items = [];
+                                            \Log::error(
+                                                'Invalid JSON in items for PurchaseOrder ID: ' . $purchaseOrder->id,
+                                            );
+                                        }
+                                    } catch (\Exception $e) {
+                                        $items = [];
+                                        \Log::error(
+                                            'Error decoding items for PurchaseOrder ID: ' .
+                                                $purchaseOrder->id .
+                                                ' - ' .
+                                                $e->getMessage(),
+                                        );
+                                    }
+                                } elseif (!is_array($items)) {
                                     $items = [];
+                                    \Log::error('Items is not an array for PurchaseOrder ID: ' . $purchaseOrder->id);
                                 }
                             @endphp
-                            @foreach ($items as $index => $item)
-                                <div
-                                    class="item-row border border-gray-200 rounded-lg p-4 space-y-4 {{ $index > 0 ? 'mt-4' : '' }}">
-                                    @if ($index > 0)
-                                        <div class="flex justify-between items-center">
-                                            <h4 class="text-md font-medium text-gray-900">Item {{ $index + 1 }}</h4>
-                                            <button type="button"
-                                                class="remove-item text-red-600 hover:text-red-800">Remove</button>
-                                        </div>
-                                    @endif
-                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        <div>
-                                            <label class="block text-sm font-medium text-gray-700">Product *</label>
-                                            <select name="items[{{ $index }}][product_id]" required
-                                                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
-                                                <option value="">Select Product</option>
-                                                @foreach ($products as $product)
-                                                    <option value="{{ $product->id }}"
-                                                        {{ $item['product_id'] == $product->id ? 'selected' : '' }}>
-                                                        {{ $product->name }} ({{ $product->sku }})
-                                                    </option>
-                                                @endforeach
-                                            </select>
-                                        </div>
-                                        <div>
-                                            <label class="block text-sm font-medium text-gray-700">Quantity *</label>
-                                            <input type="number" name="items[{{ $index }}][quantity]"
-                                                value="{{ $item['quantity'] }}" min="1" required
-                                                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                            @if (empty($items))
+                                <p class="text-sm text-gray-500">No items found. Add items below.</p>
+                            @else
+                                @foreach ($items as $index => $item)
+                                    <div
+                                        class="item-row border border-gray-200 rounded-lg p-4 space-y-4 {{ $index > 0 ? 'mt-4' : '' }}">
+                                        @if ($index > 0)
+                                            <div class="flex justify-between items-center">
+                                                <h4 class="text-md font-medium text-gray-900">Item {{ $index + 1 }}</h4>
+                                                <button type="button"
+                                                    class="remove-item text-red-600 hover:text-red-800">Remove</button>
+                                            </div>
+                                        @endif
+                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700">Product *</label>
+                                                <select name="items[{{ $index }}][product_id]" required
+                                                    class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 @error("items.$index.product_id") border-red-500 @enderror">
+                                                    <option value="">Select Product</option>
+                                                    @foreach ($products as $product)
+                                                        <option value="{{ $product->id }}"
+                                                            {{ old("items.$index.product_id", $item['product_id'] ?? '') == $product->id ? 'selected' : '' }}>
+                                                            {{ $product->name }} ({{ $product->sku }})
+                                                        </option>
+                                                    @endforeach
+                                                </select>
+                                                @error("items.$index.product_id")
+                                                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                                @enderror
+                                            </div>
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700">Quantity *</label>
+                                                <input type="number" name="items[{{ $index }}][quantity]"
+                                                    value="{{ old("items.$index.quantity", $item['quantity'] ?? 1) }}"
+                                                    min="1" required
+                                                    class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 @error("items.$index.quantity") border-red-500 @enderror">
+                                                @error("items.$index.quantity")
+                                                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                                @enderror
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                            @endforeach
+                                @endforeach
+                            @endif
                         </div>
 
                         <button type="button" id="add-item"
@@ -154,28 +195,28 @@
             const newItem = document.createElement('div');
             newItem.className = 'item-row border border-gray-200 rounded-lg p-4 space-y-4 mt-4';
             newItem.innerHTML = `
-        <div class="flex justify-between items-center">
-            <h4 class="text-md font-medium text-gray-900">Item ${itemIndex + 1}</h4>
-            <button type="button" class="remove-item text-red-600 hover:text-red-800">Remove</button>
-        </div>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-                <label class="block text-sm font-medium text-gray-700">Product *</label>
-                <select name="items[${itemIndex}][product_id]" required
-                        class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
-                    <option value="">Select Product</option>
-                    @foreach ($products as $product)
-                        <option value="{{ $product->id }}">{{ $product->name }} ({{ $product->sku }})</option>
-                    @endforeach
-                </select>
-            </div>
-            <div>
-                <label class="block text-sm font-medium text-gray-700">Quantity *</label>
-                <input type="number" name="items[${itemIndex}][quantity]" min="1" required
-                       class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
-            </div>
-        </div>
-    `;
+                <div class="flex justify-between items-center">
+                    <h4 class="text-md font-medium text-gray-900">Item ${itemIndex + 1}</h4>
+                    <button type="button" class="remove-item text-red-600 hover:text-red-800">Remove</button>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Product *</label>
+                        <select name="items[${itemIndex}][product_id]" required
+                                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                            <option value="">Select Product</option>
+                            @foreach ($products as $product)
+                                <option value="{{ $product->id }}">{{ $product->name }} ({{ $product->sku }})</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Quantity *</label>
+                        <input type="number" name="items[${itemIndex}][quantity]" min="1" required
+                               class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                </div>
+            `;
 
             container.appendChild(newItem);
             itemIndex++;

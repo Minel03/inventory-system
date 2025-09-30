@@ -96,7 +96,18 @@
                                     </span>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                    {{ count(json_decode($po->items, true)) }} items
+                                    @php
+                                        $items = is_array($po->items)
+                                            ? $po->items
+                                            : (is_string($po->items)
+                                                ? json_decode($po->items, true)
+                                                : []);
+                                        if (!is_array($items)) {
+                                            $items = [];
+                                            \Log::error('Invalid items data for PurchaseOrder ID: ' . $po->id);
+                                        }
+                                    @endphp
+                                    {{ count($items) }} items
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                     ₱{{ number_format($po->total_amount, 2) }}
