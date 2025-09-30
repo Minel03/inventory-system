@@ -16,13 +16,34 @@ class PurchaseOrderController extends Controller
      * Display a listing of the resource.
      */
 
-    public function __construct()
+    public function __construct() {}
+    public function index(Request $request)
     {
-        $this->middleware('auth');
-    }
-    public function index()
-    {
-        $purchaseOrders = PurchaseOrder::with(['supplier', 'purchaseRequisition'])->paginate(10);
+        $query = PurchaseOrder::with(['supplier', 'purchaseRequisition']);
+
+        // Search functionality
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('po_number', 'like', "%{$search}%")
+                    ->orWhereHas('supplier', function ($supplierQuery) use ($search) {
+                        $supplierQuery->where('company_name', 'like', "%{$search}%")
+                            ->orWhere('contact_person', 'like', "%{$search}%");
+                    });
+            });
+        }
+
+        // Filter by status
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        // Filter by supplier
+        if ($request->filled('supplier')) {
+            $query->where('supplier_id', $request->supplier);
+        }
+
+        $purchaseOrders = $query->orderBy('date', 'desc')->paginate(10);
         return view('purchase-orders.index', compact('purchaseOrders'));
     }
 
@@ -133,7 +154,12 @@ class PurchaseOrderController extends Controller
 
     protected function createStockMovements(PurchaseOrder $po)
     {
-        $items = json_decode($po->items, true);
+        $items = $po->items;
+
+        if (!is_array($items)) {
+            return; // Exit if items is not a valid array
+        }
+
         foreach ($items as $item) {
             $product = Product::find($item['product_id']);
             if ($product) {

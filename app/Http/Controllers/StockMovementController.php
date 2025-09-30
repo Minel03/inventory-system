@@ -17,14 +17,37 @@ class StockMovementController extends Controller
      * Display a listing of the resource.
      */
 
-    public function __construct()
-    {
-        $this->middleware('auth');
-    }
+    public function __construct() {}
 
-    public function index()
+    public function index(Request $request)
     {
-        $stockMovements = StockMovement::with(['product', 'supplier', 'warehouse'])->paginate(10);
+        $query = StockMovement::with(['product', 'supplier', 'warehouse']);
+
+        // Search functionality
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('reference_no', 'like', "%{$search}%")
+                    ->orWhere('destination', 'like', "%{$search}%")
+                    ->orWhere('reason', 'like', "%{$search}%")
+                    ->orWhereHas('product', function ($productQuery) use ($search) {
+                        $productQuery->where('name', 'like', "%{$search}%")
+                            ->orWhere('sku', 'like', "%{$search}%");
+                    });
+            });
+        }
+
+        // Filter by type
+        if ($request->filled('type')) {
+            $query->where('type', $request->type);
+        }
+
+        // Filter by product
+        if ($request->filled('product')) {
+            $query->where('product_id', $request->product);
+        }
+
+        $stockMovements = $query->orderBy('date', 'desc')->paginate(10);
         return view('stock-movements.index', compact('stockMovements'));
     }
 

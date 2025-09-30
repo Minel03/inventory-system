@@ -13,13 +13,23 @@ class SupplierController extends Controller
      * Display a listing of the resource.
      */
 
-    public function __construct()
+    public function __construct() {}
+    public function index(Request $request)
     {
-        $this->middleware('auth');
-    }
-    public function index()
-    {
-        $suppliers = Supplier::paginate(10);
+        $query = Supplier::withCount('products');
+
+        // Search functionality
+        if ($request->filled('search')) {
+            $search = $request->get('search');
+            $query->where(function ($q) use ($search) {
+                $q->where('company_name', 'like', "%{$search}%")
+                    ->orWhere('code', 'like', "%{$search}%")
+                    ->orWhere('contact_person', 'like', "%{$search}%")
+                    ->orWhere('email', 'like', "%{$search}%");
+            });
+        }
+
+        $suppliers = $query->paginate(10)->withQueryString();
         return view('suppliers.index', compact('suppliers'));
     }
 
@@ -59,29 +69,27 @@ class SupplierController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show(Supplier $supplier)
     {
-        $supplier = Supplier::findOrFail($id);
+        $supplier->load(['products', 'purchaseOrders', 'stockMovements']);
         return view('suppliers.show', compact('supplier'));
     }
 
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(string $id)
+    public function edit(Supplier $supplier)
     {
-        $supplier = Supplier::findOrFail($id);
         return view('suppliers.edit', compact('supplier'));
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(Request $request, Supplier $supplier)
     {
-        $supplier = Supplier::findOrFail($id);
         $validator = Validator::make($request->all(), [
-            'code' => 'required|unique:suppliers,code,' . $id,
+            'code' => 'required|unique:suppliers,code,' . $supplier->id,
             'company_name' => 'required|string|max:255',
             'contact_person' => 'nullable|string|max:255',
             'tin' => 'nullable|string|max:50',
@@ -103,9 +111,8 @@ class SupplierController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(Supplier $supplier)
     {
-        $supplier = Supplier::findOrFail($id);
         $supplier->delete();
         return redirect()->route('suppliers.index')->with('success', 'Supplier deleted successfully.');
     }
