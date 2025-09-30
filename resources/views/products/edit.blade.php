@@ -235,6 +235,10 @@
                                 'Fragile',
                             ];
                             $selectedTags = old('tags', $product->tags ?? []);
+                            // Ensure $selectedTags is always an array
+                            if (!is_array($selectedTags)) {
+                                $selectedTags = [];
+                            }
                         @endphp
                         @foreach ($commonTags as $tag)
                             <label class="flex items-center">

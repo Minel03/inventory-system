@@ -57,7 +57,7 @@
                         </div>
                     @endif
 
-                    @if ($product->tags && count($product->tags) > 0)
+                    @if ($product->tags && is_array($product->tags) && count($product->tags) > 0)
                         <div class="mt-4">
                             <label class="block text-sm font-medium text-gray-500">Tags</label>
                             <div class="mt-1 flex flex-wrap gap-2">

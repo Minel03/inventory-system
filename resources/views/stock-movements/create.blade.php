@@ -22,15 +22,19 @@
                         <div>
                             <label for="product_id" class="block text-sm font-medium text-gray-700">Product *</label>
                             <select name="product_id" id="product_id" required
+                                {{ request()->query('product_id') ? 'disabled' : '' }}
                                 class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 @error('product_id')  @enderror">
                                 <option value="">Select Product</option>
                                 @foreach ($products as $product)
                                     <option value="{{ $product->id }}"
-                                        {{ old('product_id') == $product->id ? 'selected' : '' }}>
+                                        {{ old('product_id', request()->query('product_id')) == $product->id ? 'selected' : '' }}>
                                         {{ $product->name }} ({{ $product->sku }})
                                     </option>
                                 @endforeach
                             </select>
+                            @if (request()->query('product_id'))
+                                <input type="hidden" name="product_id" value="{{ request()->query('product_id') }}">
+                            @endif
                             @error('product_id')
                                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                             @enderror
@@ -38,14 +42,21 @@
 
                         <div>
                             <label for="type" class="block text-sm font-medium text-gray-700">Movement Type *</label>
-                            <select name="type" id="type" required
+                            <select name="type" id="type" required {{ request()->query('type') ? 'disabled' : '' }}
                                 class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 @error('type')  @enderror">
                                 <option value="">Select Type</option>
-                                <option value="In" {{ old('type') == 'In' ? 'selected' : '' }}>Stock In</option>
-                                <option value="Out" {{ old('type') == 'Out' ? 'selected' : '' }}>Stock Out</option>
-                                <option value="Adjustment" {{ old('type') == 'Adjustment' ? 'selected' : '' }}>Adjustment
+                                <option value="In"
+                                    {{ old('type', request()->query('type')) == 'In' ? 'selected' : '' }}>Stock In</option>
+                                <option value="Out"
+                                    {{ old('type', request()->query('type')) == 'Out' ? 'selected' : '' }}>Stock Out
                                 </option>
+                                <option value="Adjustment"
+                                    {{ old('type', request()->query('type')) == 'Adjustment' ? 'selected' : '' }}>
+                                    Adjustment</option>
                             </select>
+                            @if (request()->query('type'))
+                                <input type="hidden" name="type" value="{{ request()->query('type') }}">
+                            @endif
                             @error('type')
                                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                             @enderror
@@ -54,9 +65,9 @@
                         <div>
                             <label for="reference_no" class="block text-sm font-medium text-gray-700">Reference Number
                                 *</label>
-                            <input type="text" name="reference_no" id="reference_no" value="{{ old('reference_no') }}"
-                                required
-                                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 @error('reference_no')  @enderror"
+                            <input type="text" name="reference_no" id="reference_no"
+                                value="{{ old('reference_no', $reference_no) }}" required readonly
+                                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-gray-100 cursor-not-allowed @error('reference_no')  @enderror"
                                 placeholder="e.g., PO-001, SO-001, ADJ-001">
                             @error('reference_no')
                                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
@@ -81,7 +92,7 @@
                         <div>
                             <label for="quantity" class="block text-sm font-medium text-gray-700">Quantity *</label>
                             <input type="number" name="quantity" id="quantity" value="{{ old('quantity') }}"
-                                min="1" required
+                                min="1"
                                 class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 @error('quantity')  @enderror">
                             @error('quantity')
                                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
@@ -94,8 +105,8 @@
                                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                     <span class="text-gray-500 sm:text-sm">₱</span>
                                 </div>
-                                <input type="number" name="unit_cost" id="unit_cost" value="{{ old('unit_cost') }}"
-                                    step="0.01" min="0"
+                                <input type="number" name="unit_cost" id="unit_cost"
+                                    value="{{ old('unit_cost', $default_unit_cost ?? '') }}" step="0.01" min="0"
                                     class="pl-7 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 @error('unit_cost')  @enderror">
                             </div>
                             @error('unit_cost')
@@ -127,7 +138,7 @@
                                 <option value="">Select Supplier</option>
                                 @foreach ($suppliers as $supplier)
                                     <option value="{{ $supplier->id }}"
-                                        {{ old('supplier_id') == $supplier->id ? 'selected' : '' }}>
+                                        {{ old('supplier_id', $default_supplier_id ?? '') == $supplier->id ? 'selected' : '' }}>
                                         {{ $supplier->company_name }}
                                     </option>
                                 @endforeach
@@ -146,7 +157,8 @@
 
                         <div>
                             <label for="expiry_date" class="block text-sm font-medium text-gray-700">Expiry Date</label>
-                            <input type="date" name="expiry_date" id="expiry_date" value="{{ old('expiry_date') }}"
+                            <input type="date" name="expiry_date" id="expiry_date"
+                                value="{{ old('expiry_date', $default_expiry_date ?? '') }}"
                                 class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 @error('expiry_date')  @enderror">
                             @error('expiry_date')
                                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
@@ -169,7 +181,8 @@
 
                         <div>
                             <label for="reason" class="block text-sm font-medium text-gray-700">Reason</label>
-                            <input type="text" name="reason" id="reason" value="{{ old('reason') }}"
+                            <input type="text" name="reason" id="reason"
+                                value="{{ old('reason', request()->query('type') == 'In' ? 'Stock In' : (request()->query('type') == 'Out' ? 'Stock Out' : 'Adjustment')) }}"
                                 class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 @error('reason')  @enderror"
                                 placeholder="Sale, Transfer, Damage, etc.">
                             @error('reason')
@@ -177,7 +190,8 @@
                             @enderror
                         </div>
 
-                        <div id="adjustment_field" style="display: none;">
+                        <div id="adjustment_field"
+                            style="display: {{ request()->query('type') == 'Adjustment' ? 'block' : 'none' }};">
                             <label for="adjustment_diff" class="block text-sm font-medium text-gray-700">Adjustment
                                 Difference</label>
                             <input type="number" name="adjustment_diff" id="adjustment_diff"
@@ -220,5 +234,7 @@
                 document.getElementById('adjustment_diff').required = false;
             }
         });
+
+        document.getElementById('type').dispatchEvent(new Event('change'));
     </script>
 @endsection

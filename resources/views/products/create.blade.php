@@ -21,8 +21,8 @@
 
                         <div>
                             <label for="sku" class="block text-sm font-medium text-gray-700">SKU *</label>
-                            <input type="text" name="sku" id="sku" value="{{ old('sku') }}" required
-                                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 @error('sku') @enderror">
+                            <input type="text" name="sku" id="sku" value="{{ $sku }}" readonly
+                                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-gray-100 cursor-not-allowed @error('sku') @enderror">
                             @error('sku')
                                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                             @enderror
@@ -67,7 +67,7 @@
                                 <option value="">Select Category</option>
                                 @foreach ($categories as $category)
                                     <option value="{{ $category->id }}"
-                                        {{ old('category_id') == $category->id ? 'selected' : '' }}>
+                                        {{ old('category_id', request()->query('category_id')) == $category->id ? 'selected' : '' }}>
                                         {{ $category->name }}
                                     </option>
                                 @endforeach
