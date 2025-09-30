@@ -125,16 +125,10 @@
                             class="block w-full text-center bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors">
                             Add Product
                         </a>
-                        @if (!empty($noProducts) && $noProducts)
-                            <div class="bg-red-50 text-red-700 p-3 rounded">
-                                Cannot create Purchase Order: selected supplier has no products.
-                            </div>
-                        @endif
-                        <button type="submit"
-                            class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors"
-                            @if (!empty($noProducts) && $noProducts) disabled class="bg-gray-400 cursor-not-allowed px-4 py-2 rounded-md" @endif>
+                        <a href="{{ route('purchase-orders.create', ['supplier_id' => $supplier->id]) }}"
+                            class="block w-full text-center bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition-colors">
                             Create Purchase Order
-                        </button>
+                        </a>
                     </div>
                 </div>
             </div>
@@ -171,7 +165,8 @@
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $product->sku }}</td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                        {{ $product->category->name ?? 'N/A' }}</td>
+                                        {{ $product->category->name ?? 'N/A' }}
+                                    </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <span
                                             class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $product->is_low_stock ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800' }}">
@@ -179,7 +174,8 @@
                                         </span>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                        {{ $product->formatted_price }}</td>
+                                        {{ $product->formatted_price }}
+                                    </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                         <a href="{{ route('products.show', $product) }}"
                                             class="text-blue-600 hover:text-blue-900">View</a>
@@ -227,7 +223,8 @@
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $order->po_number }}
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                        {{ $order->date->format('M d, Y') }}</td>
+                                        {{ $order->date->format('M d, Y') }}
+                                    </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <span
                                             class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
