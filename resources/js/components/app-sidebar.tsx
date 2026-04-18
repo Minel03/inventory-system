@@ -4,7 +4,7 @@ import { NavUser } from '@/components/nav-user';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
-import { BarChart3, Box, LayoutGrid, Package, Settings, ShoppingCart, Store, Tag, Truck } from 'lucide-react';
+import { BarChart3, Box, LayoutGrid, Package, Settings, ShoppingCart, Store, Truck } from 'lucide-react';
 import AppLogo from './app-logo';
 
 const mainNavItems: NavItem[] = [
@@ -14,19 +14,23 @@ const mainNavItems: NavItem[] = [
         icon: LayoutGrid,
     },
     {
-        title: 'Configuration',
-        url: '/configuration',
-        icon: Settings,
-    },
-    {
-        title: 'Items',
-        url: '/items',
+        title: 'Inventory Setup',
+        url: '#',
         icon: Box,
-    },
-    {
-        title: 'Categories',
-        url: '/categories',
-        icon: Tag,
+        items: [
+            {
+                title: 'Items',
+                url: '/items',
+            },
+            {
+                title: 'Categories',
+                url: '/categories',
+            },
+            {
+                title: 'Units of Measure',
+                url: '/units',
+            },
+        ],
     },
     {
         title: 'Suppliers',
@@ -47,6 +51,11 @@ const mainNavItems: NavItem[] = [
         title: 'Stock Transfers',
         url: '/stock-transfers',
         icon: Package,
+    },
+    {
+        title: 'Configuration',
+        url: '/configuration',
+        icon: Settings,
     },
     {
         title: 'Reports',

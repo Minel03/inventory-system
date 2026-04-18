@@ -19,6 +19,7 @@ export interface NavItem {
     url: string;
     icon?: LucideIcon | null;
     isActive?: boolean;
+    items?: NavItem[];
 }
 
 export interface SharedData {
@@ -43,9 +44,17 @@ export interface Item {
     id: number;
     name: string;
     sku: string;
-    price: number;
+    unit_cost: number;
     category_id: number;
     category?: Category;
+    unit_id?: number;
+    unit?: Unit;
+}
+
+export interface Unit {
+    id: number;
+    name: string;
+    abbreviation: string;
 }
 
 export interface Category {

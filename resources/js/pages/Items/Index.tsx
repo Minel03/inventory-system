@@ -3,8 +3,9 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import AppLayout from '@/layouts/app-layout';
 import { Item, type BreadcrumbItem } from '@/types';
-import { Head, Link } from '@inertiajs/react';
-import { Plus } from 'lucide-react';
+import { Head, Link, useForm } from '@inertiajs/react';
+import { Plus, Edit, Trash2 } from 'lucide-react';
+import { formatCurrency } from '@/lib/utils';
 
 interface Props {
     items: Item[];
@@ -18,6 +19,13 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 export default function Index({ items }: Props) {
+    const { delete: destroy } = useForm();
+
+    const handleDelete = (id: number) => {
+        if (confirm('Are you sure you want to delete this item?')) {
+            destroy(`/items/${id}`);
+        }
+    };
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Items" />
@@ -43,8 +51,10 @@ export default function Index({ items }: Props) {
                                     <tr className="hover:bg-muted/50 data-[state=selected]:bg-muted border-b transition-colors">
                                         <th className="text-muted-foreground h-12 px-4 text-left align-middle font-medium">Name</th>
                                         <th className="text-muted-foreground h-12 px-4 text-left align-middle font-medium">Category</th>
+                                        <th className="text-muted-foreground h-12 px-4 text-left align-middle font-medium">Unit</th>
                                         <th className="text-muted-foreground h-12 px-4 text-left align-middle font-medium">SKU</th>
-                                        <th className="text-muted-foreground h-12 px-4 text-right align-middle font-medium">Price</th>
+                                        <th className="text-muted-foreground h-12 px-4 text-right align-middle font-medium">Unit Cost</th>
+                                        <th className="text-muted-foreground h-12 px-4 text-right align-middle font-medium">Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody className="[&_tr:last-child]:border-0">
@@ -67,8 +77,27 @@ export default function Index({ items }: Props) {
                                                         <span className="text-xs text-muted-foreground italic">None</span>
                                                     )}
                                                 </td>
+                                                <td className="p-4 align-middle">
+                                                    {item.unit ? (
+                                                        <span className="text-xs font-mono">{item.unit.abbreviation}</span>
+                                                    ) : (
+                                                        <span className="text-xs text-muted-foreground italic">-</span>
+                                                    )}
+                                                </td>
                                                 <td className="p-4 align-middle font-mono text-xs">{item.sku}</td>
-                                                <td className="p-4 text-right align-middle font-mono">${item.price.toLocaleString()}</td>
+                                                <td className="p-4 text-right align-middle font-mono">{formatCurrency(item.unit_cost)}</td>
+                                                <td className="p-4 text-right align-middle">
+                                                    <div className="flex justify-end gap-2">
+                                                        <Button variant="ghost" size="icon" asChild>
+                                                            <Link href={`/items/${item.id}/edit`}>
+                                                                <Edit className="h-4 w-4 text-blue-600" />
+                                                            </Link>
+                                                        </Button>
+                                                        <Button variant="ghost" size="icon" onClick={() => handleDelete(item.id)}>
+                                                            <Trash2 className="h-4 w-4 text-red-600" />
+                                                        </Button>
+                                                    </div>
+                                                </td>
                                             </tr>
                                         ))
                                     )}

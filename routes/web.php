@@ -23,6 +23,7 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('categories', CategoryController::class)->names('categories');
     Route::resource('suppliers', SupplierController::class)->names('suppliers');
     Route::resource('warehouses', WarehouseController::class)->names('warehouses');
+    Route::resource('units', \App\Http\Controllers\UnitController::class)->names('units');
 
     Route::get('/purchases', [PurchaseController::class, 'index'])->name('purchases.index');
     Route::post('/purchases', [PurchaseController::class, 'store'])->name('purchases.store');
@@ -32,6 +33,8 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('/configuration', [ConfigurationController::class, 'index'])->name('configuration.index');
     Route::get('/configuration/categories', [ConfigurationController::class, 'categories'])->name('configuration.categories');
+    Route::get('/configuration/items', [ConfigurationController::class, 'items'])->name('configuration.items');
+    
     Route::post('/configuration/update', [ConfigurationController::class, 'update'])->name('configuration.update');
 });
 

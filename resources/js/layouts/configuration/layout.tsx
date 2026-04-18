@@ -5,13 +5,19 @@ import AppLayout from '@/layouts/app-layout';
 import { cn } from '@/lib/utils';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
-import { Settings, Tag, Package } from 'lucide-react';
+import { Package, Settings, Tag } from 'lucide-react';
 
 const sidebarNavItems: NavItem[] = [
     {
         title: 'General',
         url: '/configuration',
         icon: Settings,
+    },
+
+    {
+        title: 'Items',
+        url: '/configuration/items',
+        icon: Package,
     },
     {
         title: 'Categories',

@@ -6,9 +6,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import AppLayout from '@/layouts/app-layout';
-import { Category, Unit, type BreadcrumbItem } from '@/types';
+import { Category, Item, Unit, type BreadcrumbItem } from '@/types';
 import { Head, Link, useForm } from '@inertiajs/react';
-import { FormEventHandler, useEffect } from 'react';
+import { FormEventHandler } from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -16,49 +16,37 @@ const breadcrumbs: BreadcrumbItem[] = [
         href: '/items',
     },
     {
-        title: 'Add Item',
-        href: '/items/create',
+        title: 'Edit Item',
+        href: '#',
     },
 ];
 
 interface Props {
+    item: Item;
     categories: Category[];
     units: Unit[];
-    sku_padding: number;
 }
 
-export default function Create({ categories, units, sku_padding }: Props) {
-    const { data, setData, post, processing, errors } = useForm({
-        name: '',
-        sku: '',
-        unit_cost: '',
-        category_id: '',
-        unit_id: '',
+export default function Edit({ item, categories, units }: Props) {
+    const { data, setData, put, processing, errors } = useForm({
+        name: item.name,
+        sku: item.sku,
+        unit_cost: item.unit_cost.toString(),
+        category_id: item.category_id.toString(),
+        unit_id: item.unit_id?.toString() || '',
     });
-
-    // Auto-generate SKU when category changes
-    useEffect(() => {
-        if (data.category_id) {
-            const category = categories.find((c) => c.id.toString() === data.category_id);
-            if (category) {
-                const nextNum = category.next_num || 1;
-                const paddedNum = nextNum.toString().padStart(sku_padding, '0');
-                setData('sku', `${category.prefix}-${paddedNum}`);
-            }
-        }
-    }, [data.category_id, categories, sku_padding, setData]);
 
     const submit: FormEventHandler = (e) => {
         e.preventDefault();
-        post('/items');
+        put(`/items/${item.id}`);
     };
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Add Item" />
+            <Head title={`Edit Item: ${item.name}`} />
             <div className="flex flex-1 flex-col gap-4 p-4">
                 <div className="flex items-center justify-between">
-                    <Heading title="Add Item" description="Create a new inventory item. SKU will be generated based on the selected category." />
+                    <Heading title={`Edit Item: ${item.name}`} description="Update inventory item details." />
                 </div>
 
                 <div className="flex justify-center">
@@ -77,7 +65,7 @@ export default function Create({ categories, units, sku_padding }: Props) {
                                         <SelectContent>
                                             {categories.map((category) => (
                                                 <SelectItem key={category.id} value={category.id.toString()}>
-                                                    {category.path_name}
+                                                    {category.path_name || category.name}
                                                 </SelectItem>
                                             ))}
                                         </SelectContent>
@@ -115,12 +103,12 @@ export default function Create({ categories, units, sku_padding }: Props) {
                                 </div>
 
                                 <div className="grid gap-2">
-                                    <Label htmlFor="sku">SKU (Auto-generated)</Label>
+                                    <Label htmlFor="sku">SKU</Label>
                                     <Input
                                         id="sku"
                                         value={data.sku}
                                         onChange={(e) => setData('sku', e.target.value)}
-                                        placeholder="Select category first"
+                                        placeholder="e.g. ELEC-0001"
                                         className="font-mono text-xs uppercase"
                                         required
                                     />
@@ -146,7 +134,7 @@ export default function Create({ categories, units, sku_padding }: Props) {
                                         <Link href="/items">Cancel</Link>
                                     </Button>
                                     <Button type="submit" disabled={processing}>
-                                        {processing ? 'Saving...' : 'Save Item'}
+                                        {processing ? 'Saving...' : 'Update Item'}
                                     </Button>
                                 </div>
                             </form>

@@ -8,15 +8,16 @@ import { FormEventHandler } from 'react';
 
 interface Props {
     settings: {
-        category_prefix_length: string;
+        sku_padding: string;
+        sku_random_length?: string;
     };
 }
 
-export default function CategoriesConfiguration({ settings }: Props) {
+export default function ItemsConfiguration({ settings }: Props) {
     const { data, setData, post, processing } = useForm({
-        group: 'categories',
+        group: 'items',
         settings: {
-            category_prefix_length: settings.category_prefix_length || '4',
+            sku_padding: settings.sku_padding || '4',
         },
     });
 
@@ -27,28 +28,27 @@ export default function CategoriesConfiguration({ settings }: Props) {
 
     return (
         <ConfigurationLayout>
-            <Head title="Category Configuration" />
+            <Head title="Items Configuration" />
 
             <form onSubmit={submit} className="space-y-6">
                 <Card>
                     <CardHeader>
-                        <CardTitle>Category Settings</CardTitle>
-                        <CardDescription>Configure how categories behave, including automated prefix generation rules.</CardDescription>
+                        <CardTitle>Item SKU Settings</CardTitle>
+                        <CardDescription>Configure how item SKUs are generated across the system.</CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
                         <div className="grid gap-2">
-                            <Label htmlFor="category_prefix_length">Auto-generated Prefix Length</Label>
+                            <Label htmlFor="sku_padding">SKU Number Padding</Label>
                             <Input
-                                id="category_prefix_length"
+                                id="sku_padding"
                                 type="number"
                                 min="1"
                                 max="10"
-                                value={data.settings.category_prefix_length}
-                                onChange={(e) => setData('settings', { ...data.settings, category_prefix_length: e.target.value })}
+                                value={data.settings.sku_padding}
+                                onChange={(e) => setData('settings', { ...data.settings, sku_padding: e.target.value })}
                             />
                             <p className="text-muted-foreground text-sm">
-                                The number of characters to take from the category name when generating a prefix (e.g., "Electronics" with length 4
-                                becomes "ELEC").
+                                The number of digits for the sequential part of the SKU (e.g., "4" for "0001", "3" for "001").
                             </p>
                         </div>
                     </CardContent>

@@ -21,7 +21,7 @@ class SettingSeeder extends Seeder
             [
                 'key' => 'sku_padding',
                 'value' => '4',
-                'group' => 'categories',
+                'group' => 'items',
             ],
             [
                 'key' => 'sku_random_length',

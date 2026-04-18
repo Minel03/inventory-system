@@ -29,6 +29,16 @@ class ConfigurationController extends Controller
     }
 
     /**
+     * Display item-related configuration settings.
+     */
+    public function items()
+    {
+        return Inertia::render('Configuration/Items', [
+            'settings' => Setting::where('group', 'items')->get()->pluck('value', 'key'),
+        ]);
+    }
+
+    /**
      * Update configuration settings.
      */
     public function update(Request $request)

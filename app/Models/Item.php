@@ -9,12 +9,18 @@ class Item extends Model
     protected $fillable = [
         'name',
         'sku',
-        'price',
+        'unit_cost',
         'category_id',
+        'unit_id',
     ];
 
-    public function category()
+    public function category(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
         return $this->belongsTo(Category::class);
+    }
+
+    public function unit(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(Unit::class);
     }
 }
