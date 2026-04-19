@@ -10,8 +10,10 @@ class UnitController extends Controller
 {
     public function index()
     {
+        $units = Unit::all();
+
         return Inertia::render('Units/Index', [
-            'units' => Unit::all(),
+            'units' => $units,
         ]);
     }
 
@@ -30,8 +32,8 @@ class UnitController extends Controller
     public function update(Request $request, Unit $unit)
     {
         $request->validate([
-            'name' => 'required|string|unique:units,name,' . $unit->id . '|max:255',
-            'abbreviation' => 'required|string|unique:units,abbreviation,' . $unit->id . '|max:50',
+            'name' => 'required|string|unique:units,name,'.$unit->id.'|max:255',
+            'abbreviation' => 'required|string|unique:units,abbreviation,'.$unit->id.'|max:50',
         ]);
 
         $unit->update($request->all());

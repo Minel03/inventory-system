@@ -6,6 +6,8 @@ use App\Http\Controllers\ItemController;
 use App\Http\Controllers\PurchaseController;
 use App\Http\Controllers\StockTransferController;
 use App\Http\Controllers\SupplierController;
+use App\Http\Controllers\UnitController;
+use App\Http\Controllers\UsersController;
 use App\Http\Controllers\WarehouseController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -23,10 +25,17 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('categories', CategoryController::class)->names('categories');
     Route::resource('suppliers', SupplierController::class)->names('suppliers');
     Route::resource('warehouses', WarehouseController::class)->names('warehouses');
-    Route::resource('units', \App\Http\Controllers\UnitController::class)->names('units');
+    Route::resource('units', UnitController::class)->names('units');
+    Route::resource('users', UsersController::class)->names('users');
 
-    Route::get('/purchases', [PurchaseController::class, 'index'])->name('purchases.index');
-    Route::post('/purchases', [PurchaseController::class, 'store'])->name('purchases.store');
+    Route::resource('purchases', PurchaseController::class)->names('purchases');
+    Route::get('/purchases/{purchase}/print', [PurchaseController::class, 'print'])->name('purchases.print');
+    Route::patch('/purchases/{purchase}/approve', [PurchaseController::class, 'approve'])->name('purchases.approve');
+    Route::patch('/purchases/{purchase}/approve-l1', [PurchaseController::class, 'approveL1'])->name('purchases.approve-l1');
+    Route::patch('/purchases/{purchase}/approve-l2', [PurchaseController::class, 'approveL2'])->name('purchases.approve-l2');
+    Route::patch('/purchases/{purchase}/assign-supplier', [PurchaseController::class, 'assignSupplier'])->name('purchases.assign-supplier');
+    Route::patch('/purchases/{purchase}/receive', [PurchaseController::class, 'receive'])->name('purchases.receive');
+    Route::patch('/purchases/{purchase}/cancel', [PurchaseController::class, 'cancel'])->name('purchases.cancel');
 
     Route::get('/transfers', [StockTransferController::class, 'index'])->name('transfers.index');
     Route::post('/transfers', [StockTransferController::class, 'store'])->name('transfers.store');
@@ -34,7 +43,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/configuration', [ConfigurationController::class, 'index'])->name('configuration.index');
     Route::get('/configuration/categories', [ConfigurationController::class, 'categories'])->name('configuration.categories');
     Route::get('/configuration/items', [ConfigurationController::class, 'items'])->name('configuration.items');
-    
+
     Route::post('/configuration/update', [ConfigurationController::class, 'update'])->name('configuration.update');
 });
 

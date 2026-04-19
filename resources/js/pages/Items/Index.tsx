@@ -1,10 +1,11 @@
 import Heading from '@/components/heading';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import AppLayout from '@/layouts/app-layout';
 import { Item, type BreadcrumbItem } from '@/types';
 import { Head, Link, useForm } from '@inertiajs/react';
-import { Plus, Edit, Trash2 } from 'lucide-react';
+import { Plus, Edit, Trash2, Eye } from 'lucide-react';
 import { formatCurrency } from '@/lib/utils';
 
 interface Props {
@@ -54,13 +55,14 @@ export default function Index({ items }: Props) {
                                         <th className="text-muted-foreground h-12 px-4 text-left align-middle font-medium">Unit</th>
                                         <th className="text-muted-foreground h-12 px-4 text-left align-middle font-medium">SKU</th>
                                         <th className="text-muted-foreground h-12 px-4 text-right align-middle font-medium">Unit Cost</th>
+                                        <th className="text-muted-foreground h-12 px-4 text-center align-middle font-medium">VAT</th>
                                         <th className="text-muted-foreground h-12 px-4 text-right align-middle font-medium">Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody className="[&_tr:last-child]:border-0">
                                     {items.length === 0 ? (
                                         <tr>
-                                            <td colSpan={4} className="text-muted-foreground p-4 text-center">
+                                            <td colSpan={7} className="text-muted-foreground p-4 text-center">
                                                 No items found.
                                             </td>
                                         </tr>
@@ -86,8 +88,20 @@ export default function Index({ items }: Props) {
                                                 </td>
                                                 <td className="p-4 align-middle font-mono text-xs">{item.sku}</td>
                                                 <td className="p-4 text-right align-middle font-mono">{formatCurrency(item.unit_cost)}</td>
+                                                <td className="p-4 align-middle text-center">
+                                                    {item.is_vatable ? (
+                                                        <Badge variant="default" className="text-[10px] px-1.5 py-0">VAT</Badge>
+                                                    ) : (
+                                                        <Badge variant="secondary" className="text-[10px] px-1.5 py-0">Non-VAT</Badge>
+                                                    )}
+                                                </td>
                                                 <td className="p-4 text-right align-middle">
                                                     <div className="flex justify-end gap-2">
+                                                        <Button variant="ghost" size="icon" asChild>
+                                                            <Link href={`/items/${item.id}`}>
+                                                                <Eye className="h-4 w-4" />
+                                                            </Link>
+                                                        </Button>
                                                         <Button variant="ghost" size="icon" asChild>
                                                             <Link href={`/items/${item.id}/edit`}>
                                                                 <Edit className="h-4 w-4 text-blue-600" />

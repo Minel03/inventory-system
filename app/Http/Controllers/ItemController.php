@@ -41,6 +41,7 @@ class ItemController extends Controller
             'unit_cost' => 'required|numeric|min:0',
             'category_id' => 'required|exists:categories,id',
             'unit_id' => 'required|exists:units,id',
+            'is_vatable' => 'boolean',
         ]);
 
         $category = Category::findOrFail($request->category_id);
@@ -55,6 +56,21 @@ class ItemController extends Controller
         $category->increment('next_num');
 
         return redirect()->route('items.index');
+    }
+
+    public function show(Item $item)
+    {
+        $item->load([
+            'category', 
+            'unit', 
+            'warehouses.warehouse', 
+            'movements.warehouse', 
+            'movements.user'
+        ]);
+
+        return Inertia::render('Items/Show', [
+            'item' => $item,
+        ]);
     }
 
     public function edit(Item $item)
@@ -81,6 +97,7 @@ class ItemController extends Controller
             'unit_cost' => 'required|numeric|min:0',
             'category_id' => 'required|exists:categories,id',
             'unit_id' => 'required|exists:units,id',
+            'is_vatable' => 'boolean',
         ]);
 
         $item->update($request->all());

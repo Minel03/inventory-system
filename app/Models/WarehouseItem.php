@@ -4,21 +4,17 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class PurchaseItem extends Model
+class WarehouseItem extends Model
 {
-    public $timestamps = false;
-
     protected $fillable = [
-        'purchase_id',
+        'warehouse_id',
         'item_id',
         'quantity',
-        'quantity_received',
-        'price',
     ];
 
-    public function purchase()
+    public function warehouse()
     {
-        return $this->belongsTo(Purchase::class);
+        return $this->belongsTo(Warehouse::class);
     }
 
     public function item()

@@ -2,6 +2,7 @@ import Heading from '@/components/heading';
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -34,6 +35,7 @@ export default function Edit({ item, categories, units }: Props) {
         unit_cost: item.unit_cost.toString(),
         category_id: item.category_id.toString(),
         unit_id: item.unit_id?.toString() || '',
+        is_vatable: item.is_vatable,
     });
 
     const submit: FormEventHandler = (e) => {
@@ -127,6 +129,17 @@ export default function Edit({ item, categories, units }: Props) {
                                         required
                                     />
                                     <InputError message={errors.unit_cost} />
+                                </div>
+
+                                <div className="flex items-center space-x-2">
+                                    <Checkbox
+                                        id="is_vatable"
+                                        checked={data.is_vatable}
+                                        onCheckedChange={(checked) => setData('is_vatable', checked === true)}
+                                    />
+                                    <Label htmlFor="is_vatable" className="font-normal text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                                        Is Vatable (Subject to VAT)
+                                    </Label>
                                 </div>
 
                                 <div className="flex items-center justify-end gap-3 pt-4">

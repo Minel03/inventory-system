@@ -2,9 +2,9 @@ import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
-import { type NavItem } from '@/types';
-import { Link } from '@inertiajs/react';
-import { BarChart3, Box, LayoutGrid, Package, Settings, ShoppingCart, Store, Truck } from 'lucide-react';
+import { type NavItem, SharedData } from '@/types';
+import { Link, usePage } from '@inertiajs/react';
+import { BarChart3, Box, LayoutGrid, Package, Settings, ShoppingCart, Store, Truck, Users } from 'lucide-react';
 import AppLogo from './app-logo';
 
 const mainNavItems: NavItem[] = [
@@ -12,6 +12,11 @@ const mainNavItems: NavItem[] = [
         title: 'Dashboard',
         url: '/dashboard',
         icon: LayoutGrid,
+    },
+    {
+        title: 'User Management',
+        url: '/users',
+        icon: Users,
     },
     {
         title: 'Inventory Setup',
@@ -43,13 +48,19 @@ const mainNavItems: NavItem[] = [
         icon: Store,
     },
     {
-        title: 'Orders',
-        url: '/orders',
+        title: 'Purchasing',
+        url: '#',
         icon: ShoppingCart,
+        items: [
+            {
+                title: 'Requisitions & Orders',
+                url: '/purchases',
+            },
+        ],
     },
     {
         title: 'Stock Transfers',
-        url: '/stock-transfers',
+        url: '/transfers',
         icon: Package,
     },
     {
@@ -67,6 +78,16 @@ const mainNavItems: NavItem[] = [
 const footerNavItems: NavItem[] = [];
 
 export function AppSidebar() {
+    const { auth } = usePage<SharedData>().props;
+    const userRole = auth.user.role;
+
+    const filteredNavItems = mainNavItems.filter((item) => {
+        if (item.title === 'User Management') {
+            return userRole === 'admin';
+        }
+        return true;
+    });
+
     return (
         <Sidebar collapsible="icon" variant="inset">
             <SidebarHeader>
@@ -82,7 +103,7 @@ export function AppSidebar() {
             </SidebarHeader>
 
             <SidebarContent>
-                <NavMain items={mainNavItems} />
+                <NavMain items={filteredNavItems} />
             </SidebarContent>
 
             <SidebarFooter>

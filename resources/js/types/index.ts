@@ -35,9 +35,11 @@ export interface User {
     email: string;
     avatar?: string;
     email_verified_at: string | null;
+    role: string | null;
+    warehouse_id?: number | null;
     created_at: string;
     updated_at: string;
-    [key: string]: unknown; // This allows for additional properties...
+    [key: string]: unknown;
 }
 
 export interface Item {
@@ -49,6 +51,9 @@ export interface Item {
     category?: Category;
     unit_id?: number;
     unit?: Unit;
+    is_vatable: boolean;
+    warehouses?: WarehouseItem[];
+    movements?: InventoryMovement[];
 }
 
 export interface Unit {
@@ -71,12 +76,18 @@ export interface Supplier {
     name: string;
     contact_person: string;
     phone: string;
+    email?: string;
+    address?: string;
+    is_vatable: boolean;
 }
 
 export interface Warehouse {
     id: number;
     name: string;
-    location: string;
+    address: string;
+    is_main: boolean;
+    items?: WarehouseItem[];
+    movements?: InventoryMovement[];
 }
 
 export interface WarehouseItem {
@@ -84,4 +95,53 @@ export interface WarehouseItem {
     item_id: number;
     warehouse_id: number;
     quantity: number;
+    warehouse?: Warehouse;
+    item?: Item;
 }
+
+export interface InventoryMovement {
+    id: number;
+    item_id: number;
+    warehouse_id: number;
+    user_id?: number;
+    quantity: number;
+    type: string;
+    reference_id?: number;
+    notes?: string;
+    created_at: string;
+    warehouse?: Warehouse;
+    user?: User;
+}
+
+export interface PurchaseItem {
+    id: number;
+    purchase_id: number;
+    item_id: number;
+    quantity: number;
+    quantity_received: number;
+    price: number;
+    item?: Item;
+}
+
+export interface Purchase {
+    id: number;
+    pr_number?: string;
+    po_number?: string;
+    supplier_id?: number;
+    warehouse_id?: number;
+    purchase_date: string;
+    expected_delivery_date?: string;
+    status: string; // pending | po_draft | ordered | partially_received | received | cancelled
+    notes?: string;
+    created_at: string;
+    supplier?: Supplier;
+    warehouse?: Warehouse;
+    items?: PurchaseItem[];
+    l1_approved_by?: number;
+    l1_approved_at?: string;
+    l2_approved_by?: number;
+    l2_approved_at?: string;
+    l1_approver?: User;
+    l2_approver?: User;
+}
+

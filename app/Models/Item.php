@@ -12,6 +12,11 @@ class Item extends Model
         'unit_cost',
         'category_id',
         'unit_id',
+        'is_vatable',
+    ];
+
+    protected $casts = [
+        'is_vatable' => 'boolean',
     ];
 
     public function category(): \Illuminate\Database\Eloquent\Relations\BelongsTo
@@ -22,5 +27,15 @@ class Item extends Model
     public function unit(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
         return $this->belongsTo(Unit::class);
+    }
+
+    public function warehouses()
+    {
+        return $this->hasMany(WarehouseItem::class);
+    }
+
+    public function movements()
+    {
+        return $this->hasMany(InventoryMovement::class);
     }
 }
