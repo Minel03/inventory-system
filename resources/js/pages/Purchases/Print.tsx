@@ -32,7 +32,7 @@ export default function PurchasePrint({ purchase, companyName, companyAddress, c
         };
 
         return () => clearTimeout(timer);
-    }, []);
+    }, [purchase.id]);
 
     const total = purchase.items?.reduce((sum, item) => sum + item.quantity * item.price, 0) ?? 0;
     const isPR = !purchase.po_number;

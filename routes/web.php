@@ -44,6 +44,7 @@ Route::middleware(['auth'])->group(function () {
 
 
     Route::get('/configuration', [ConfigurationController::class, 'index'])->name('configuration.index');
+    Route::get('/configuration/numbering', [ConfigurationController::class, 'numbering'])->name('configuration.numbering');
     Route::get('/configuration/categories', [ConfigurationController::class, 'categories'])->name('configuration.categories');
     Route::get('/configuration/items', [ConfigurationController::class, 'items'])->name('configuration.items');
 

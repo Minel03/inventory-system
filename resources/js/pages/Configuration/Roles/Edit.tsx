@@ -1,4 +1,4 @@
-import ConfigurationLayout from '@/layouts/configuration/layout';
+import AppLayout from '@/layouts/app-layout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -58,10 +58,10 @@ export default function RoleEdit({ role, availablePermissions }: Props) {
     }, {} as Record<string, Permission[]>);
 
     return (
-        <ConfigurationLayout>
+        <AppLayout>
             <Head title={isEditing ? 'Edit Role' : 'Create Role'} />
-            
-            <form onSubmit={submit} className="space-y-6 max-w-4xl">
+            <div className="flex flex-1 flex-col gap-4 p-4">
+                <form onSubmit={submit} className="space-y-6 max-w-4xl">
                 <Card>
                     <CardHeader>
                         <CardTitle>{isEditing ? 'Role Permissions' : 'New Role'}</CardTitle>
@@ -126,6 +126,7 @@ export default function RoleEdit({ role, availablePermissions }: Props) {
                     </CardFooter>
                 </Card>
             </form>
-        </ConfigurationLayout>
+            </div>
+        </AppLayout>
     );
 }

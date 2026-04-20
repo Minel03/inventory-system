@@ -53,7 +53,7 @@ interface Props {
 
 export default function PurchaseShow({ purchase, suppliers, mainWarehouse, mainWarehouseStock = {} }: Props) {
     const { auth } = usePage<SharedData>().props;
-    const userRole: string = (auth.user as any)?.role ?? '';
+    const userRole: string = (auth.user as { role?: string })?.role ?? '';
 
     const isPR = purchase.status === 'pending' || (purchase.status === 'cancelled' && !purchase.po_number);
     const documentLabel = isPR ? (purchase.pr_number ?? `PR #${purchase.id}`) : (purchase.po_number ?? `PO #${purchase.id}`);
@@ -64,21 +64,6 @@ export default function PurchaseShow({ purchase, suppliers, mainWarehouse, mainW
     ];
 
     const [selectedSupplier, setSelectedSupplier] = useState('');
-    const [transferring, setTransferring] = useState<number | null>(null);
-
-    // Form for stock transfer
-    const {
-        data: dataTransfer,
-        setData: setDataTransfer,
-        post: postTransfer,
-        processing: processingTransfer,
-    } = useForm({
-        item_id: 0,
-        from_warehouse: mainWarehouse?.id ?? 0,
-        to_warehouse: purchase.warehouse_id,
-        quantity: 0,
-        purchase_item_id: 0,
-    });
 
     // GR form state
     const { data, setData, patch, processing } = useForm<{

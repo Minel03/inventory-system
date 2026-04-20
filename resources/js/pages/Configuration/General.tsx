@@ -18,12 +18,8 @@ export default function GeneralConfiguration({ settings }: Props) {
             company_name: settings.company_name || '',
             company_address: settings.company_address || '',
             company_phone: settings.company_phone || '',
-            po_prefix: settings.po_prefix || 'PO',
-            po_start_number: settings.po_start_number || '1',
-            pr_prefix: settings.pr_prefix || 'PR',
-            pr_start_number: settings.pr_start_number || '1',
         },
-        group: 'general' // We handle both general and numbering in this view but default to general group logic
+        group: 'general',
     });
 
     const submit: FormEventHandler = (e) => {
@@ -78,71 +74,13 @@ export default function GeneralConfiguration({ settings }: Props) {
                                 onChange={e => updateSetting('company_phone', e.target.value)}
                             />
                         </div>
-                    </CardContent>
-                </Card>
-
-                <Card>
-                    <CardHeader>
-                        <CardTitle>PO & PR Numbering</CardTitle>
-                        <CardDescription>
-                            Configure how Purchase Orders and Requisitions are numbered.
-                        </CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-6">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div className="space-y-4 border-r pr-6 last:border-0">
-                                <h3 className="font-medium text-sm">Purchase Requisition (PR)</h3>
-                                <div className="grid gap-2">
-                                    <Label htmlFor="pr_prefix">Prefix</Label>
-                                    <Input 
-                                        id="pr_prefix" 
-                                        value={data.settings.pr_prefix} 
-                                        onChange={e => updateSetting('pr_prefix', e.target.value)}
-                                        placeholder="PR"
-                                    />
-                                </div>
-                                <div className="grid gap-2">
-                                    <Label htmlFor="pr_start_number">Starting Number</Label>
-                                    <Input 
-                                        id="pr_start_number" 
-                                        type="number"
-                                        value={data.settings.pr_start_number} 
-                                        onChange={e => updateSetting('pr_start_number', e.target.value)}
-                                        placeholder="1"
-                                    />
-                                </div>
-                            </div>
-
-                            <div className="space-y-4">
-                                <h3 className="font-medium text-sm">Purchase Order (PO)</h3>
-                                <div className="grid gap-2">
-                                    <Label htmlFor="po_prefix">Prefix</Label>
-                                    <Input 
-                                        id="po_prefix" 
-                                        value={data.settings.po_prefix} 
-                                        onChange={e => updateSetting('po_prefix', e.target.value)}
-                                        placeholder="PO"
-                                    />
-                                </div>
-                                <div className="grid gap-2">
-                                    <Label htmlFor="po_start_number">Starting Number</Label>
-                                    <Input 
-                                        id="po_start_number" 
-                                        type="number"
-                                        value={data.settings.po_start_number} 
-                                        onChange={e => updateSetting('po_start_number', e.target.value)}
-                                        placeholder="1"
-                                    />
-                                </div>
-                            </div>
+                        <div className="pt-4">
+                            <Button type="submit" disabled={processing}>
+                                {processing ? <LoaderCircle className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+                                Save Settings
+                            </Button>
                         </div>
                     </CardContent>
-                    <CardFooter className="flex justify-end border-t pt-6">
-                        <Button type="submit" disabled={processing}>
-                            {processing ? <LoaderCircle className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
-                            Save Settings
-                        </Button>
-                    </CardFooter>
                 </Card>
             </form>
         </ConfigurationLayout>

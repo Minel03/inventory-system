@@ -1,15 +1,9 @@
 import { usePage } from '@inertiajs/react';
-
-interface SharedData {
-  auth: {
-    user: any;
-    permissions: string[];
-  };
-}
+import { SharedData } from '@/types';
 
 export function usePermission() {
-  const { auth } = usePage<any>().props;
-  const permissions = auth.permissions || [];
+  const { auth } = usePage<SharedData>().props;
+  const permissions: string[] = (auth as SharedData['auth'] & { permissions?: string[] }).permissions ?? [];
 
   const can = (permission: string) => {
     return permissions.includes(permission);
