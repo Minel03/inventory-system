@@ -2,6 +2,7 @@ import { LucideIcon } from 'lucide-react';
 
 export interface Auth {
     user: User;
+    permissions: string[];
 }
 
 export interface BreadcrumbItem {
@@ -118,9 +119,26 @@ export interface PurchaseItem {
     purchase_id: number;
     item_id: number;
     quantity: number;
+    quantity_transferred: number;
+    quantity_ordered: number;
     quantity_received: number;
     price: number;
     item?: Item;
+    transfers?: StockTransfer[];
+}
+
+export interface StockTransfer {
+    id: number;
+    purchase_item_id?: number;
+    item_id: number;
+    from_warehouse: number;
+    to_warehouse: number;
+    quantity: number;
+    status: 'processing' | 'in_transit' | 'delivered' | 'cancelled';
+    created_at: string;
+    item?: Item;
+    fromWarehouse?: Warehouse;
+    toWarehouse?: Warehouse;
 }
 
 export interface Purchase {

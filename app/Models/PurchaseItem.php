@@ -12,9 +12,16 @@ class PurchaseItem extends Model
         'purchase_id',
         'item_id',
         'quantity',
+        'quantity_transferred',
+        'quantity_ordered',
         'quantity_received',
         'price',
     ];
+
+    public function transfers()
+    {
+        return $this->hasMany(StockTransfer::class, 'purchase_item_id');
+    }
 
     public function purchase()
     {

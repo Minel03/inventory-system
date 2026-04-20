@@ -4,6 +4,7 @@ use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ConfigurationController;
 use App\Http\Controllers\ItemController;
 use App\Http\Controllers\PurchaseController;
+use App\Http\Controllers\RoleController;
 use App\Http\Controllers\StockTransferController;
 use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\UnitController;
@@ -27,6 +28,7 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('warehouses', WarehouseController::class)->names('warehouses');
     Route::resource('units', UnitController::class)->names('units');
     Route::resource('users', UsersController::class)->names('users');
+    Route::resource('roles', RoleController::class)->names('roles');
 
     Route::resource('purchases', PurchaseController::class)->names('purchases');
     Route::get('/purchases/{purchase}/print', [PurchaseController::class, 'print'])->name('purchases.print');
@@ -37,8 +39,9 @@ Route::middleware(['auth'])->group(function () {
     Route::patch('/purchases/{purchase}/receive', [PurchaseController::class, 'receive'])->name('purchases.receive');
     Route::patch('/purchases/{purchase}/cancel', [PurchaseController::class, 'cancel'])->name('purchases.cancel');
 
-    Route::get('/transfers', [StockTransferController::class, 'index'])->name('transfers.index');
-    Route::post('/transfers', [StockTransferController::class, 'store'])->name('transfers.store');
+    Route::resource('transfers', StockTransferController::class)->names('transfers');
+    Route::patch('/transfers/{transfer}/receive', [StockTransferController::class, 'receive'])->name('transfers.receive');
+
 
     Route::get('/configuration', [ConfigurationController::class, 'index'])->name('configuration.index');
     Route::get('/configuration/categories', [ConfigurationController::class, 'categories'])->name('configuration.categories');

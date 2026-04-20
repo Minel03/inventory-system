@@ -13,8 +13,12 @@ class ConfigurationController extends Controller
      */
     public function index()
     {
+        $settings = Setting::whereIn('group', ['general', 'numbering'])
+            ->get()
+            ->pluck('value', 'key');
+
         return Inertia::render('Configuration/General', [
-            'settings' => Setting::where('group', 'general')->get(),
+            'settings' => $settings,
         ]);
     }
 

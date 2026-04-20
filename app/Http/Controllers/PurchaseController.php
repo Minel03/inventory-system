@@ -17,23 +17,27 @@ use Inertia\Inertia;
 
 class PurchaseController extends Controller
 {
-    /** Generate a sequential PR number: PR-YYYY-XXXX */
     private function generatePrNumber(): string
     {
         $year = now()->year;
-        $count = Purchase::whereYear('created_at', $year)->count() + 1;
+        $prefix = Setting::get('pr_prefix', 'PR');
+        $startNum = (int) Setting::get('pr_start_number', 1);
+        
+        $count = Purchase::whereYear('created_at', $year)->count() + $startNum;
 
-        return sprintf('PR-%d-%04d', $year, $count);
+        return sprintf('%s-%d-%04d', $prefix, $year, $count);
     }
 
-    /** Generate a sequential PO number: PO-YYYY-XXXX */
     private function generatePoNumber(): string
     {
         $year = now()->year;
-        // Count only records that already have a PO number
-        $count = Purchase::whereYear('created_at', $year)->whereNotNull('po_number')->count() + 1;
+        $prefix = Setting::get('po_prefix', 'PO');
+        $startNum = (int) Setting::get('po_start_number', 1);
 
-        return sprintf('PO-%d-%04d', $year, $count);
+        // Count only records that already have a PO number
+        $count = Purchase::whereYear('created_at', $year)->whereNotNull('po_number')->count() + $startNum;
+
+        return sprintf('%s-%d-%04d', $prefix, $year, $count);
     }
 
     public function index()
@@ -62,9 +66,15 @@ class PurchaseController extends Controller
 
     public function create()
     {
+        $mainWarehouse = Warehouse::where('is_main', true)->first();
+        $mainWarehouseStock = WarehouseItem::where('warehouse_id', $mainWarehouse?->id)
+            ->get()
+            ->pluck('quantity', 'item_id');
+
         return Inertia::render('Purchases/Create', [
             'items' => Item::with(['unit', 'category'])->get(),
             'warehouses' => Warehouse::orderByDesc('is_main')->get(),
+            'mainWarehouseStock' => $mainWarehouseStock,
         ]);
     }
 
@@ -109,11 +119,22 @@ class PurchaseController extends Controller
 
     public function show(Purchase $purchase)
     {
-        $purchase->load(['supplier', 'warehouse', 'items.item.unit', 'l1Approver', 'l2Approver']);
+        $purchase->load(['supplier', 'warehouse', 'items.item.unit', 'items.transfers.fromWarehouse', 'l1Approver', 'l2Approver']);
+
+        // Fetch stock levels from the Main Warehouse for all items in this purchase
+        $mainWarehouse = Warehouse::where('is_main', true)->first();
+        $itemIds = $purchase->items->pluck('item_id');
+        
+        $mainWarehouseStock = WarehouseItem::where('warehouse_id', $mainWarehouse?->id)
+            ->whereIn('item_id', $itemIds)
+            ->get()
+            ->pluck('quantity', 'item_id');
 
         return Inertia::render('Purchases/Show', [
             'purchase' => $purchase,
             'suppliers' => Supplier::orderBy('name')->get(),
+            'mainWarehouse' => $mainWarehouse,
+            'mainWarehouseStock' => $mainWarehouseStock,
             'companySettings' => [
                 'name' => Setting::get('company_name', 'Inventory System'),
                 'address' => Setting::get('company_address', '123 Business Road, Suite 100'),
@@ -145,12 +166,37 @@ class PurchaseController extends Controller
             return back()->withErrors(['status' => 'Only pending requisitions can be approved.']);
         }
 
-        $purchase->update([
-            'status' => 'po_draft',
-            'po_number' => $this->generatePoNumber(),
-        ]);
+        DB::transaction(function () use ($purchase) {
+            $hasItemsToOrder = false;
 
-        return back()->with('success', "PR {$purchase->pr_number} approved. Draft PO {$purchase->po_number} has been created.");
+            // Calculate initial quantity_ordered for all items
+            foreach ($purchase->items as $item) {
+                $remaining = $item->quantity - $item->quantity_transferred;
+                $ordered = max(0, $remaining);
+                $item->update(['quantity_ordered' => $ordered]);
+
+                if ($ordered > 0) {
+                    $hasItemsToOrder = true;
+                }
+            }
+
+            if ($hasItemsToOrder) {
+                $purchase->update([
+                    'status' => 'po_draft',
+                    'po_number' => $this->generatePoNumber(),
+                ]);
+                $message = "PR {$purchase->pr_number} approved. Draft PO {$purchase->po_number} has been created for the remaining items.";
+            } else {
+                $purchase->update([
+                    'status' => 'transferring',
+                ]);
+                $message = "PR {$purchase->pr_number} approved and fully sourced via internal transfers.";
+            }
+
+            session()->flash('success', $message);
+        });
+
+        return back();
     }
 
     /**

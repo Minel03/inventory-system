@@ -3,6 +3,7 @@ import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { type NavItem, SharedData } from '@/types';
+import { usePermission } from '@/hooks/use-permission';
 import { Link, usePage } from '@inertiajs/react';
 import { BarChart3, Box, LayoutGrid, Package, Settings, ShoppingCart, Store, Truck, Users } from 'lucide-react';
 import AppLogo from './app-logo';
@@ -65,8 +66,18 @@ const mainNavItems: NavItem[] = [
     },
     {
         title: 'Configuration',
-        url: '/configuration',
+        url: '#',
         icon: Settings,
+        items: [
+            {
+                title: 'General Settings',
+                url: '/configuration',
+            },
+            {
+                title: 'Roles & Permissions',
+                url: '/roles',
+            },
+        ],
     },
     {
         title: 'Reports',
@@ -78,12 +89,17 @@ const mainNavItems: NavItem[] = [
 const footerNavItems: NavItem[] = [];
 
 export function AppSidebar() {
-    const { auth } = usePage<SharedData>().props;
-    const userRole = auth.user.role;
+    const { can } = usePermission();
 
     const filteredNavItems = mainNavItems.filter((item) => {
         if (item.title === 'User Management') {
-            return userRole === 'admin';
+            return can('manage_users');
+        }
+        if (item.title === 'Configuration') {
+            return can('manage_settings');
+        }
+        if (item.title === 'Reports') {
+            return can('view_purchases'); // Temporary gate for reports
         }
         return true;
     });

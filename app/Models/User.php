@@ -25,9 +25,30 @@ class User extends Authenticatable
         'warehouse_id',
     ];
 
+    public function assignedRole()
+    {
+        return $this->belongsTo(Role::class, 'role_id');
+    }
+
     public function warehouse()
     {
         return $this->belongsTo(Warehouse::class);
+    }
+
+    /**
+     * Check if the user has a specific permission.
+     */
+    public function hasPermission(string $permission): bool
+    {
+        $role = $this->assignedRole ?? null;
+        
+        if (!$role || !$role->permissions) {
+            // Fallback for hardcoded admin column
+            if ($this->getAttribute('role') === 'admin') return true;
+            return false;
+        }
+
+        return in_array($permission, $role->permissions);
     }
 
     /**

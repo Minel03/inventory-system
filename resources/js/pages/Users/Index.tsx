@@ -1,9 +1,10 @@
 import { Head, Link } from '@inertiajs/react';
 import { BreadcrumbItem, User, Warehouse } from '@/types';
 import AppLayout from '@/layouts/app-layout';
+import { usePermission } from '@/hooks/use-permission';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Edit2, Shield, Store, User as UserIcon } from 'lucide-react';
+import { Edit2, Shield, Store, User as UserIcon, UserPlus } from 'lucide-react';
 import Heading from '@/components/heading';
 
 interface UserWithWarehouse extends User {
@@ -40,6 +41,8 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 export default function UsersIndex({ users }: Props) {
+    const { can } = usePermission();
+
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="User Management" />
@@ -49,6 +52,13 @@ export default function UsersIndex({ users }: Props) {
                         title="User Management" 
                         description="Assign roles and warehouses to employees to control access and approvals." 
                     />
+                    {can('manage_users') && (
+                        <Button asChild>
+                            <Link href="/users/create">
+                                <UserPlus className="mr-2 h-4 w-4" /> Create User
+                            </Link>
+                        </Button>
+                    )}
                 </div>
 
                 <div className="rounded-md border bg-card overflow-x-auto">
@@ -106,12 +116,14 @@ function TableRow({ user }: { user: UserWithWarehouse }) {
                 )}
             </td>
             <td className="p-4 align-middle text-right">
-                <Button variant="ghost" size="sm" asChild>
-                    <Link href={`/users/${user.id}/edit`}>
-                        <Edit2 className="mr-2 h-4 w-4" />
-                        Edit Access
-                    </Link>
-                </Button>
+                {usePermission().can('manage_users') && (
+                    <Button variant="ghost" size="sm" asChild>
+                        <Link href={`/users/${user.id}/edit`}>
+                            <Edit2 className="mr-2 h-4 w-4" />
+                            Edit Access
+                        </Link>
+                    </Button>
+                )}
             </td>
         </tr>
     );

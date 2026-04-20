@@ -2,6 +2,7 @@ import Heading from '@/components/heading';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import AppLayout from '@/layouts/app-layout';
+import { usePermission } from '@/hooks/use-permission';
 import { Purchase, type BreadcrumbItem } from '@/types';
 import { Head, Link } from '@inertiajs/react';
 import { Eye, Plus } from 'lucide-react';
@@ -18,6 +19,7 @@ const PO_STATUS_STYLES: Record<string, string> = {
     po_draft:  'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400',
     ordered:   'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400',
     received:  'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400',
+    partially_received: 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400',
     cancelled: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400',
 };
 
@@ -25,6 +27,7 @@ const PO_STATUS_LABELS: Record<string, string> = {
     po_draft:  'Draft — Awaiting Supplier',
     ordered:   'Ordered',
     received:  'Received',
+    partially_received: 'Partially Received',
     cancelled: 'Cancelled',
 };
 
@@ -113,6 +116,7 @@ function PurchaseTable({ rows, type }: { rows: Purchase[]; type: 'pr' | 'po' }) 
 
 export default function PurchasesIndex({ requisitions, orders }: Props) {
     const [tab, setTab] = useState<'pr' | 'po'>('pr');
+    const { can } = usePermission();
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -120,11 +124,13 @@ export default function PurchasesIndex({ requisitions, orders }: Props) {
             <div className="flex flex-1 flex-col gap-4 p-4">
                 <div className="flex items-center justify-between">
                     <Heading title="Purchases" description="Manage requisitions and purchase orders" />
-                    <Button asChild>
-                        <Link href="/purchases/create">
-                            <Plus className="mr-2 h-4 w-4" /> New Requisition
-                        </Link>
-                    </Button>
+                    {can('create_pr') && (
+                        <Button asChild>
+                            <Link href="/purchases/create">
+                                <Plus className="mr-2 h-4 w-4" /> New Requisition
+                            </Link>
+                        </Button>
+                    )}
                 </div>
 
                 {/* Tabs */}

@@ -7,12 +7,18 @@ use Illuminate\Database\Eloquent\Model;
 class StockTransfer extends Model
 {
     protected $fillable = [
+        'purchase_item_id',
         'item_id',
         'from_warehouse',
         'to_warehouse',
         'quantity',
         'status',
     ];
+
+    public function purchaseItem()
+    {
+        return $this->belongsTo(PurchaseItem::class);
+    }
 
     public function item()
     {

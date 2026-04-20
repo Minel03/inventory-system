@@ -33,6 +33,26 @@ class SettingSeeder extends Seeder
                 'value' => 'Inventory System',
                 'group' => 'general',
             ],
+            [
+                'key' => 'po_prefix',
+                'value' => 'PO',
+                'group' => 'numbering',
+            ],
+            [
+                'key' => 'po_start_number',
+                'value' => '1',
+                'group' => 'numbering',
+            ],
+            [
+                'key' => 'pr_prefix',
+                'value' => 'PR',
+                'group' => 'numbering',
+            ],
+            [
+                'key' => 'pr_start_number',
+                'value' => '1',
+                'group' => 'numbering',
+            ],
         ];
 
         foreach ($settings as $setting) {
