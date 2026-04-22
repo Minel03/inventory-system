@@ -4,6 +4,7 @@ use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ConfigurationController;
 use App\Http\Controllers\ItemController;
 use App\Http\Controllers\PurchaseController;
+use App\Http\Controllers\ReportController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\StockTransferController;
 use App\Http\Controllers\SupplierController;
@@ -18,9 +19,7 @@ Route::get('/', function () {
 })->name('home');
 
 Route::middleware(['auth'])->group(function () {
-    Route::get('dashboard', function () {
-        return Inertia::render('dashboard');
-    })->name('dashboard');
+    Route::get('dashboard', \App\Http\Controllers\DashboardController::class)->name('dashboard');
 
     Route::resource('items', ItemController::class)->names('items');
     Route::resource('categories', CategoryController::class)->names('categories');
@@ -40,6 +39,8 @@ Route::middleware(['auth'])->group(function () {
     Route::patch('/purchases/{purchase}/cancel', [PurchaseController::class, 'cancel'])->name('purchases.cancel');
 
     Route::resource('transfers', StockTransferController::class)->names('transfers');
+    Route::patch('/transfers/{transfer}/processed', [StockTransferController::class, 'markProcessed'])->name('transfers.processed');
+    Route::patch('/transfers/{transfer}/in-transit', [StockTransferController::class, 'markInTransit'])->name('transfers.in-transit');
     Route::patch('/transfers/{transfer}/receive', [StockTransferController::class, 'receive'])->name('transfers.receive');
 
 
@@ -49,6 +50,10 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/configuration/items', [ConfigurationController::class, 'items'])->name('configuration.items');
 
     Route::post('/configuration/update', [ConfigurationController::class, 'update'])->name('configuration.update');
+
+    Route::get('/reports/pr', [ReportController::class, 'prReport'])->name('reports.pr');
+    Route::get('/reports/po', [ReportController::class, 'poReport'])->name('reports.po');
+    Route::get('/reports/items', [ReportController::class, 'itemReport'])->name('reports.items');
 });
 
 require __DIR__.'/settings.php';

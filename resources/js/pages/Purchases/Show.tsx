@@ -171,19 +171,21 @@ export default function PurchaseShow({ purchase, suppliers, mainWarehouse, mainW
                         )}
                     </div>
                     <div className="flex gap-2">
-                        <Button
-                            variant="outline"
-                            onClick={() => {
-                                const printWindow = window.open(`/purchases/${purchase.id}/print`, '_blank');
-                                if (!printWindow) {
-                                    // Fallback if popup is blocked
-                                    window.location.href = `/purchases/${purchase.id}/print`;
-                                }
-                            }}
-                        >
-                            <Printer className="mr-2 h-4 w-4" />
-                            Print Receipt
-                        </Button>
+                        {['ordered', 'partially_received', 'received'].includes(purchase.status) && (
+                            <Button
+                                variant="outline"
+                                onClick={() => {
+                                    const printWindow = window.open(`/purchases/${purchase.id}/print`, '_blank');
+                                    if (!printWindow) {
+                                        // Fallback if popup is blocked
+                                        window.location.href = `/purchases/${purchase.id}/print`;
+                                    }
+                                }}
+                            >
+                                <Printer className="mr-2 h-4 w-4" />
+                                Print Receipt
+                            </Button>
+                        )}
                     </div>
                 </div>
 

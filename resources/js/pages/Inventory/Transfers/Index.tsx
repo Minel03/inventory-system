@@ -11,8 +11,9 @@ const breadcrumbs: BreadcrumbItem[] = [{ title: 'Stock Transfers', href: '/trans
 
 const STATUS_STYLES: Record<string, string> = {
     processing: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300',
+    processed: 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300',
     in_transit: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300',
-    delivered: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300',
+    received: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300',
     cancelled: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400',
 };
 
@@ -21,8 +22,18 @@ interface Props {
 }
 
 export default function TransfersIndex({ transfers }: Props) {
+    function markProcessed(id: number) {
+        if (!confirm('Mark this transfer as processed?')) return;
+        router.patch(`/transfers/${id}/processed`);
+    }
+
+    function markInTransit(id: number) {
+        if (!confirm('Mark this transfer as in transit? This will deduct stock from the source warehouse.')) return;
+        router.patch(`/transfers/${id}/in-transit`);
+    }
+
     function receive(id: number) {
-        if (!confirm('Mark this transfer as received and update stock?')) return;
+        if (!confirm('Mark this transfer as received? This will add stock to the destination warehouse.')) return;
         router.patch(`/transfers/${id}/receive`);
     }
 
@@ -73,6 +84,18 @@ export default function TransfersIndex({ transfers }: Props) {
                                         </td>
                                         <td className="p-4 text-right">
                                             {t.status === 'processing' && (
+                                                <Button size="sm" variant="outline" onClick={() => markProcessed(t.id)}>
+                                                    <CheckCircle className="mr-2 h-4 w-4" />
+                                                    Mark Processed
+                                                </Button>
+                                            )}
+                                            {t.status === 'processed' && (
+                                                <Button size="sm" variant="outline" onClick={() => markInTransit(t.id)}>
+                                                    <Truck className="mr-2 h-4 w-4" />
+                                                    Mark In Transit
+                                                </Button>
+                                            )}
+                                            {t.status === 'in_transit' && (
                                                 <Button size="sm" onClick={() => receive(t.id)}>
                                                     <CheckCircle className="mr-2 h-4 w-4" />
                                                     Mark Received

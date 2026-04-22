@@ -81,8 +81,22 @@ const mainNavItems: NavItem[] = [
     },
     {
         title: 'Reports',
-        url: '/reports',
+        url: '#',
         icon: BarChart3,
+        items: [
+            {
+                title: 'Purchase Requisitions',
+                url: '/reports/pr',
+            },
+            {
+                title: 'Purchase Orders',
+                url: '/reports/po',
+            },
+            {
+                title: 'Item Movement',
+                url: '/reports/items',
+            },
+        ],
     },
 ];
 

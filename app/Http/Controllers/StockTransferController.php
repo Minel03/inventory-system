@@ -5,7 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\StockTransfer;
 use App\Models\PurchaseItem;
 use App\Models\WarehouseItem;
+use App\Models\InventoryMovement;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class StockTransferController extends Controller
@@ -43,16 +45,30 @@ class StockTransferController extends Controller
     }
 
     /**
-     * Mark the transfer as received and update stock levels.
+     * Mark the transfer as processed.
      */
-    public function receive(StockTransfer $transfer)
+    public function markProcessed(StockTransfer $transfer)
     {
         if ($transfer->status !== 'processing') {
             return back()->withErrors(['status' => 'Transfer is not in processing state.']);
         }
 
+        $transfer->update(['status' => 'processed']);
+
+        return back()->with('success', 'Transfer marked as processed.');
+    }
+
+    /**
+     * Mark the transfer as in transit and deduct from source warehouse.
+     */
+    public function markInTransit(StockTransfer $transfer)
+    {
+        if ($transfer->status !== 'processed') {
+            return back()->withErrors(['status' => 'Transfer must be processed before it can be in transit.']);
+        }
+
         DB::transaction(function () use ($transfer) {
-            // 1. Deduct from Source
+            // Deduct from Source
             $source = WarehouseItem::where('warehouse_id', $transfer->from_warehouse)
                 ->where('item_id', $transfer->item_id)
                 ->first();
@@ -63,16 +79,55 @@ class StockTransferController extends Controller
 
             $source->decrement('quantity', $transfer->quantity);
 
-            // 2. Add to Destination
+            // Log movement (Out)
+            InventoryMovement::create([
+                'warehouse_id' => $transfer->from_warehouse,
+                'item_id' => $transfer->item_id,
+                'user_id' => Auth::id(),
+                'quantity' => -$transfer->quantity,
+                'type' => 'transfer_out',
+                'reference_id' => $transfer->id,
+                'notes' => "Transferred out {$transfer->quantity} unit(s) to Warehouse #{$transfer->to_warehouse}",
+            ]);
+
+            // Update status
+            $transfer->update(['status' => 'in_transit']);
+        });
+
+        return back()->with('success', 'Transfer is now in transit. Stock deducted from source.');
+    }
+
+    /**
+     * Mark the transfer as received and update destination stock levels.
+     */
+    public function receive(StockTransfer $transfer)
+    {
+        if ($transfer->status !== 'in_transit') {
+            return back()->withErrors(['status' => 'Transfer is not in transit state.']);
+        }
+
+        DB::transaction(function () use ($transfer) {
+            // Add to Destination
             WarehouseItem::updateOrCreate(
                 ['warehouse_id' => $transfer->to_warehouse, 'item_id' => $transfer->item_id],
                 ['quantity' => DB::raw("quantity + {$transfer->quantity}")]
             );
 
-            // 3. Update status
-            $transfer->update(['status' => 'delivered']);
+            // Log movement (In)
+            InventoryMovement::create([
+                'warehouse_id' => $transfer->to_warehouse,
+                'item_id' => $transfer->item_id,
+                'user_id' => Auth::id(),
+                'quantity' => $transfer->quantity,
+                'type' => 'transfer_in',
+                'reference_id' => $transfer->id,
+                'notes' => "Received {$transfer->quantity} unit(s) from Warehouse #{$transfer->from_warehouse}",
+            ]);
+
+            // Update status
+            $transfer->update(['status' => 'received']);
         });
 
-        return back()->with('success', 'Stock transfer completed and quantities updated.');
+        return back()->with('success', 'Stock transfer received and destination quantities updated.');
     }
 }
