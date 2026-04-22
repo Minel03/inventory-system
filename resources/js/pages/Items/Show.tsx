@@ -6,7 +6,7 @@ import AppLayout from '@/layouts/app-layout';
 import { Item, type BreadcrumbItem } from '@/types';
 import { Head, Link } from '@inertiajs/react';
 import { formatCurrency } from '@/lib/utils';
-import { ArrowLeft, Box, Copy, TrendingUp, History } from 'lucide-react';
+import { ArrowLeft, Box, TrendingUp, History } from 'lucide-react';
 
 interface Props {
     item: Item;
