@@ -3,7 +3,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import AppLayout from '@/layouts/app-layout';
-import { StockTransfer, type BreadcrumbItem } from '@/types';
+import { StockTransfer, Warehouse, type BreadcrumbItem } from '@/types';
 import { Head, router } from '@inertiajs/react';
 import { CheckCircle, Truck } from 'lucide-react';
 
@@ -74,8 +74,8 @@ export default function TransfersIndex({ transfers }: Props) {
                                             <div className="font-medium">{t.item?.name}</div>
                                             <div className="text-xs text-muted-foreground font-mono">{t.item?.sku}</div>
                                         </td>
-                                        <td className="p-4">{(t.from_warehouse as any)?.name}</td>
-                                        <td className="p-4">{(t.to_warehouse as any)?.name}</td>
+                                        <td className="p-4">{(t.from_warehouse as Warehouse).name}</td>
+                                        <td className="p-4">{(t.to_warehouse as Warehouse).name}</td>
                                         <td className="p-4 text-right font-mono font-bold">{t.quantity}</td>
                                         <td className="p-4 text-center">
                                             <Badge className={STATUS_STYLES[t.status] || ''} variant="outline">

@@ -16,14 +16,6 @@ interface Props {
     users: UserWithWarehouse[];
 }
 
-const ROLE_LABELS: Record<string, string> = {
-    admin: 'Administrator',
-    manager: 'Manager',
-    buyer: 'Buyer',
-    approver_l1: 'Level 1 Approver',
-    approver_l2: 'Level 2 Approver',
-    warehouse: 'Warehouse Staff',
-};
 
 const ROLE_COLORS: Record<string, string> = {
     admin: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300',
