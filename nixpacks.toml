@@ -1,0 +1,15 @@
+[phases.build]
+# This runs after composer install and npm install
+cmds = [
+    "npm run build",
+    "php artisan optimize",
+    "php artisan view:cache"
+]
+
+[phases.setup]
+# Ensures the right PHP environment
+nixPkgs = ["php83", "php83Packages.composer", "nodejs_20"]
+
+[start]
+# Runs every time the container starts up
+cmd = "php artisan migrate --force && php artisan serve --host=0.0.0.0 --port=$PORT"
