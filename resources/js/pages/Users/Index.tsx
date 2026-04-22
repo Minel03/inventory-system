@@ -9,6 +9,7 @@ import Heading from '@/components/heading';
 
 interface UserWithWarehouse extends User {
     warehouse?: Warehouse;
+    assigned_role?: { id: number; name: string; slug: string };
 }
 
 interface Props {
@@ -99,9 +100,9 @@ function TableRow({ user }: { user: UserWithWarehouse }) {
             </td>
             <td className="p-4 align-middle">
                 <div className="flex items-center gap-2">
-                    <Badge variant="outline" className={`font-medium ${user.role ? ROLE_COLORS[user.role] : 'bg-gray-100 text-gray-800'}`}>
+                    <Badge variant="outline" className={`font-medium ${user.assigned_role ? (ROLE_COLORS[user.assigned_role.slug] ?? 'bg-gray-100 text-gray-800') : 'bg-gray-100 text-gray-800'}`}>
                         <Shield className="mr-1 h-3 w-3" />
-                        {user.role ? (ROLE_LABELS[user.role] || user.role) : 'No Role Assigned'}
+                        {user.assigned_role ? user.assigned_role.name : 'No Role Assigned'}
                     </Badge>
                 </div>
             </td>

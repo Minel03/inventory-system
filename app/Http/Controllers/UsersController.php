@@ -27,13 +27,18 @@ class UsersController extends Controller
 
     public function store(Request $request)
     {
-        $validated = $request->validate([
+        $data = $request->all();
+        if (isset($data['warehouse_id']) && $data['warehouse_id'] === 'none') {
+            $data['warehouse_id'] = null;
+        }
+
+        $validated = validator($data, [
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:8|confirmed',
             'role_id' => 'required|exists:roles,id',
             'warehouse_id' => 'nullable|exists:warehouses,id',
-        ]);
+        ])->validate();
 
         User::create([
             'name' => $validated['name'],
@@ -65,7 +70,7 @@ class UsersController extends Controller
         }
 
         $validated = validator($data, [
-            'role' => 'required|string',
+            'role_id' => 'required|exists:roles,id',
             'warehouse_id' => 'nullable|exists:warehouses,id',
         ])->validate();
 

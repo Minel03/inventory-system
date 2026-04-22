@@ -1,7 +1,7 @@
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import AppLayout from '@/layouts/app-layout';
-import { type BreadcrumbItem, Item, StockTransfer } from '@/types';
+import { type BreadcrumbItem, Item, StockTransfer, Warehouse } from '@/types';
 import { Head, Link } from '@inertiajs/react';
 import { AlertTriangle, Banknote, FileText, Package, TrendingUp, Truck } from 'lucide-react';
 
@@ -23,7 +23,7 @@ interface DashboardProps {
         total_inventory_value: number;
         low_stock_items: (Item & { global_stock: number })[];
         top_moving_items: (Item & { global_stock: number; volume_30d: number })[];
-        recent_transfers: (StockTransfer & { from_warehouse?: any; to_warehouse?: any })[];
+        recent_transfers: (StockTransfer & { from_warehouse?: Warehouse; to_warehouse?: Warehouse })[];
     };
 }
 
@@ -239,7 +239,9 @@ export default function Dashboard({ stats, analytics }: DashboardProps) {
     );
 }
 
-function ArrowRight(props: any) {
+import { SVGProps } from 'react';
+
+function ArrowRight(props: SVGProps<SVGSVGElement>) {
     return (
         <svg
             {...props}

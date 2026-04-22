@@ -74,8 +74,8 @@ export default function TransfersIndex({ transfers }: Props) {
                                             <div className="font-medium">{t.item?.name}</div>
                                             <div className="text-xs text-muted-foreground font-mono">{t.item?.sku}</div>
                                         </td>
-                                        <td className="p-4">{t.fromWarehouse?.name}</td>
-                                        <td className="p-4">{t.toWarehouse?.name}</td>
+                                        <td className="p-4">{(t.from_warehouse as any)?.name}</td>
+                                        <td className="p-4">{(t.to_warehouse as any)?.name}</td>
                                         <td className="p-4 text-right font-mono font-bold">{t.quantity}</td>
                                         <td className="p-4 text-center">
                                             <Badge className={STATUS_STYLES[t.status] || ''} variant="outline">

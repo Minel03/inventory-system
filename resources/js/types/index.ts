@@ -37,6 +37,7 @@ export interface User {
     avatar?: string;
     email_verified_at: string | null;
     role: string | null;
+    role_id?: number | null;
     warehouse_id?: number | null;
     created_at: string;
     updated_at: string;
@@ -131,14 +132,12 @@ export interface StockTransfer {
     id: number;
     purchase_item_id?: number;
     item_id: number;
-    from_warehouse: number;
-    to_warehouse: number;
+    from_warehouse: number | Warehouse;
+    to_warehouse: number | Warehouse;
     quantity: number;
-    status: 'processing' | 'in_transit' | 'delivered' | 'cancelled';
+    status: 'processing' | 'processed' | 'in_transit' | 'received' | 'cancelled';
     created_at: string;
     item?: Item;
-    fromWarehouse?: Warehouse;
-    toWarehouse?: Warehouse;
 }
 
 export interface Purchase {

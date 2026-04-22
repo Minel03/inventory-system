@@ -20,7 +20,7 @@ class DashboardController extends Controller
 
         $items->each(function ($item) use (&$total_inventory_value, &$low_stock_items) {
             $item->global_stock = $item->warehouses->sum('quantity');
-            $total_inventory_value += $item->global_stock * $item->price;
+            $total_inventory_value += $item->global_stock * $item->unit_cost;
             
             if ($item->global_stock < 10) {
                 $low_stock_items[] = $item;

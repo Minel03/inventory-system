@@ -11,12 +11,12 @@ import Heading from '@/components/heading';
 interface Props {
     user: User;
     warehouses: Warehouse[];
-    roles: { id: string; name: string }[];
+    roles: { id: number; name: string }[];
 }
 
 export default function UsersEdit({ user, warehouses, roles }: Props) {
     const { data, setData, patch, processing, errors } = useForm({
-        role: user.role || 'warehouse',
+        role_id: user.role_id?.toString() || '',
         warehouse_id: user.warehouse_id?.toString() || 'none',
     });
 
@@ -57,19 +57,19 @@ export default function UsersEdit({ user, warehouses, roles }: Props) {
                         <CardContent className="space-y-4">
                             <div className="space-y-2">
                                 <Label htmlFor="role">Functional Role</Label>
-                                <Select value={data.role} onValueChange={(val) => setData('role', val)}>
+                                <Select value={data.role_id} onValueChange={(val) => setData('role_id', val)}>
                                     <SelectTrigger id="role">
                                         <SelectValue placeholder="Select a role" />
                                     </SelectTrigger>
                                     <SelectContent>
                                         {roles.map((role) => (
-                                            <SelectItem key={role.id} value={role.id}>
+                                            <SelectItem key={role.id} value={role.id.toString()}>
                                                 {role.name}
                                             </SelectItem>
                                         ))}
                                     </SelectContent>
                                 </Select>
-                                {errors.role && <p className="text-sm text-destructive">{errors.role}</p>}
+                                {errors.role_id && <p className="text-sm text-destructive">{errors.role_id}</p>}
                             </div>
                         </CardContent>
                     </Card>
